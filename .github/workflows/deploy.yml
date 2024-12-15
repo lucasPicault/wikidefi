@@ -58,7 +58,7 @@ jobs:
         tar -xzf wiki-back.tar.gz
         rm wiki-back.tar.gz
 
-        # Installer la version correcte de Node.js
+        # Installer la version correcte de Node.js avec nvm
         if [ ! -d "$HOME/.nvm" ]; then
           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
         fi
@@ -66,8 +66,8 @@ jobs:
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-        # Installer et utiliser la version spécifiée de Node.js
-        nvm install ${NODE_VERSION} || nvm install node
+        # Installer et utiliser explicitement la version spécifiée
+        nvm install ${NODE_VERSION}
         nvm use ${NODE_VERSION}
 
         # Vérifications
