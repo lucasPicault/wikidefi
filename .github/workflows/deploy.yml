@@ -45,7 +45,7 @@ jobs:
     # Déployer et démarrer le serveur
     - name: Deploy and start server
       env:
-        NODE_VERSION: 18.20.5
+        NODE_VERSION: 20.9.0
       run: |
         ssh -tt a1543162@access-5016847966.webspace-host.com << 'EOF'
         set -e
@@ -57,7 +57,13 @@ jobs:
         tar -xzf wiki-back.tar.gz
         rm wiki-back.tar.gz
 
-        # Vérifier NVM et Node.js
+        # Installer la version correcte de Node.js
+        if [ ! -d "$HOME/.nvm" ]; then
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        fi
+
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         nvm install $NODE_VERSION
