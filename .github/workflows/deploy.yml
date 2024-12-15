@@ -19,7 +19,15 @@ jobs:
       run: |
         cd wiki-back
         npm install
-        npm run build || echo "Build step failed or skipped"
+        npm run build
+        cd ..
+
+    # Installer les dépendances frontend et construire le frontend localement (si applicable)
+    - name: Build frontend
+      run: |
+        cd wiki-front
+        npm install || echo "No dependencies required for frontend"
+        npm run build || echo "No build step required for frontend"
         cd ..
 
     # Configurer SSH pour se connecter au serveur
@@ -30,15 +38,11 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
 
-    # Déployer uniquement si le dossier dist existe
-    - name: Deploy backend to server
-      if: success() && runner.os == 'Linux'
+    # Déployer les fichiers backend et frontend compilés sur le serveur
+    - name: Deploy to server
       run: |
-        if [ -d "./wiki-back/dist" ]; then
-          rsync -avz --delete ./wiki-back/dist/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-back/dist
-        else
-          echo "Backend dist folder not found, skipping deployment"
-        fi
+        rsync -avz --delete ./wiki-back/dist/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-back/dist
+        rsync -avz --delete ./wiki-front/dist/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-front
 
     # Démarrer ou redémarrer le backend avec PM2
     - name: Start backend with PM2
@@ -48,6 +52,8 @@ jobs:
         cd ~/wikidefi/wiki-back
         if ! command -v pm2 &> /dev/null; then
           echo "PM2 is not installed. Installing..."
+          curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+          sudo apt-get install -y nodejs
           npm install -g pm2
         fi
         pm2 start dist/server.js --name "wiki-backend" || pm2 restart "wiki-backend"
