@@ -1,0 +1,40 @@
+/* input.css */
+/* Style de base pour le champ input */
+input[type="text"], input[type="password"], input[type="email"] {
+  width: 100%; /* Ajuste automatiquement à la largeur du conteneur parent */
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: 2px solid #ccc; /* Bordure initiale */
+  border-radius: 8px; /* Coins arrondis */
+  outline: none; /* Supprime le contour par défaut */
+  transition: border-color 0.3s, box-shadow 0.3s; /* Animation fluide */
+  background-color: #f9f9f9;
+}
+
+/* Lorsqu'on survole le champ */
+input[type="text"]:hover, input[type="password"]:hover, input[type="email"]:hover {
+  border-color: #6200EE; /* Bordure plus visible */
+}
+
+/* Lorsqu'on clique ou se concentre sur le champ */
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+  border-color: #6200EE; /* Bordure colorée */
+  box-shadow: 0 0 8px rgba(98, 0, 238, 0.5); /* Effet lumineux */
+  background-color: #fff; /* Fond plus clair */
+}
+
+/* Placeholder (texte indicatif dans le champ) */
+input[type="text"]::placeholder, input[type="password"]::placeholder, input[type="email"]::placeholder {
+  color: #aaa; /* Couleur discrète */
+  font-style: italic; /* Texte en italique */
+}
+
+/* Champ désactivé */
+input[type="text"]:disabled, input[type="password"]:disabled, input[type="email"]:disabled {
+  background-color: #e9e9e9; /* Fond gris clair */
+  border-color: #d3d3d3;
+  color: #888;
+  cursor: not-allowed;
+}
+
+  

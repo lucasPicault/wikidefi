@@ -1,0 +1,113 @@
+body {
+    background: #f0f0f0;
+    margin: 10px;
+}
+.infobox {
+   width: 100% !important;
+}
+
+
+
+
+/* player.css */
+
+/* Conteneur principal */
+
+  
+  /* En-tête */
+  header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  header h1 {
+    font-size: 2rem;
+    margin: 0;
+  }
+  
+  .info-message {
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  /* Section d'attente */
+  .waiting-section {
+    background-color: #ffeded;
+    color: #d9534f;
+    border: 1px solid #d9534f;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Section de jeu */
+  .game-section {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+  }
+  
+  /* Contenu Wiki */
+  .wiki-content {
+    flex: 3;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #fff;
+    max-height: 60vh;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+  
+  .wiki-content a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .wiki-content a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Tableau des scores */
+  .scoreboard {
+    flex: 1;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #fff;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .scoreboard h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .scoreboard table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .scoreboard th, .scoreboard td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .scoreboard th {
+    background-color: #f4f4f4;
+  }
+  
+  .scoreboard tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  /* Ajout d'une animation pour les transitions */
+  #info {
+    transition: color 0.3s ease-in-out;
+  }
+  

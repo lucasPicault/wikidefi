@@ -1,0 +1,16 @@
+/* base.css */
+body, html {
+    margin: 0;
+    padding: 10px;
+    height: 100%;
+    font-family: sans-serif;
+    background: #f0f0f0;
+
+  }
+  
+  h1 {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  

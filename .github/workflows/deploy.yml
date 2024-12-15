@@ -1,0 +1,48 @@
+name: Deploy to IONOS
+
+on:
+  push:
+    branches:
+      - main # Déclenche le workflow sur un push dans la branche main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Vérifier le code du dépôt
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Configurer SSH pour se connecter au serveur
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
+
+    # Déployer le code sur le serveur
+    - name: Deploy code to server
+      run: |
+        rsync -avz --exclude 'node_modules' --exclude '.git' ./ a1543162@access-5016847966.webspace-host.com:~/wikidefi
+
+    # Installer les dépendances backend et frontend
+    - name: Install dependencies and build
+      run: |
+        ssh a1543162@access-5016847966.webspace-host.com << 'EOF'
+        cd /wikidefi
+        npm install
+        cd ../wiki-back
+        npm install
+        npm run build
+        EOF
+
+    # Lancer le backend avec pm2
+    - name: Start backend with PM2
+      run: |
+        ssh a1543162@access-5016847966.webspace-host.com << 'EOF'
+        cd /wikidefi/wiki-back
+        pm2 start server.js --name "wiki-backend"
+        pm2 save
+        EOF
