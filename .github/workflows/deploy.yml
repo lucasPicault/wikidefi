@@ -23,10 +23,13 @@ jobs:
         npm run build
         cd ..
 
-    # Archiver les fichiers construits
-    - name: Archive build files
+    # Préparer un environnement de production avec Node.js et les fichiers construits
+    - name: Prepare production files
       run: |
-        tar -czf wiki-back.tar.gz wiki-back/
+        mkdir deployment
+        cp -r wiki-back deployment/wiki-back
+        echo "${{ vars.NODE_VERSION }}" > deployment/node_version.txt
+        tar -czf deployment.tar.gz deployment/
 
     # Configurer SSH pour se connecter au serveur
     - name: Setup SSH
@@ -41,12 +44,10 @@ jobs:
     # Transférer les fichiers archivés sur le serveur
     - name: Transfer build to server
       run: |
-        scp wiki-back.tar.gz a1543162@access-5016847966.webspace-host.com:~/wikidefi/
+        scp deployment.tar.gz a1543162@access-5016847966.webspace-host.com:~/wikidefi/
 
     # Déployer et démarrer le serveur
     - name: Deploy and start server
-      env:
-        NODE_VERSION: ${{ vars.NODE_VERSION }} # Récupère la variable NODE_VERSION de l'environnement
       run: |
         ssh -tt a1543162@access-5016847966.webspace-host.com << 'EOF'
         set -e
@@ -55,30 +56,11 @@ jobs:
         cd ~/wikidefi
 
         # Extraire les fichiers
-        tar -xzf wiki-back.tar.gz
-        rm wiki-back.tar.gz
-
-        # Installer la version correcte de Node.js avec nvm
-        if [ ! -d "$HOME/.nvm" ]; then
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-        fi
-
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-        # Installer et utiliser explicitement la version spécifiée
-        nvm install ${NODE_VERSION}
-        nvm use ${NODE_VERSION}
-
-        # Vérifications
-        node -v
-        npm -v
-
-        # Arrêter l'ancien serveur
-        pkill -f "node server.js" || echo "No existing server process to stop."
+        tar -xzf deployment.tar.gz
+        rm deployment.tar.gz
 
         # Démarrer le serveur en arrière-plan
-        cd wiki-back
+        cd deployment/wiki-back
         nohup node server.js > output.log 2>&1 &
         echo "Server started successfully."
         EOF
