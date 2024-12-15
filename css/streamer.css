@@ -1,0 +1,138 @@
+@import url("buttons.css");
+@import url("input.css");
+
+/* Conteneur principal */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px auto;
+  max-width: 800px;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Titre principal */
+h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+/* Section de configuration du bot */
+#bot-config-section {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+#bot-config-section h2 {
+  margin-bottom: 10px;
+  font-size: 1.5em;
+  color: #444;
+}
+
+#bot-config-section p {
+  margin: 5px 0 15px;
+  color: #666;
+}
+
+#bot-config-section input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#bot-config-status {
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #28a745; /* Couleur verte pour succès */
+}
+
+/* Section de création de session */
+#session-creation {
+  width: 100%;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+#session-creation label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+#session-creation input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#session-creation .suggestions {
+  position: relative;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  margin-top: -10px;
+  z-index: 10;
+}
+
+#session-creation .suggestions li {
+  padding: 10px;
+  cursor: pointer;
+  color: #333;
+}
+
+#session-creation .suggestions li:hover {
+  background: #f0f0f0;
+}
+
+/* Section de lancement et gestion */
+#launch-section {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Scoreboard */
+#scoreboard {
+  margin-top: 20px;
+  width: 100%;
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#scoreboard table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#scoreboard th,
+#scoreboard td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+#scoreboard th {
+  background: #f8f9fa;
+  color: #333;
+}

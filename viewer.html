@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Viewer - Saisir un code</title>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/layout.css">
+<link rel="stylesheet" href="/css/viewer.css">
+</head>
+<body>
+<div class="container">
+    <h1>Vous êtes Viewer</h1>
+    <p>Entrez le code de session fourni par le streamer :</p>
+    <input type="text" id="session-code" placeholder="Code session ex: ABC123" />
+    <br/>
+    <button id="join-btn">Rejoindre la session</button>
+</div>
+<script>
+document.getElementById('join-btn').addEventListener('click', () => {
+  const code = document.getElementById('session-code').value.trim();
+  if(!code) {
+    alert("Veuillez entrer un code de session.");
+    return;
+  }
+  window.location.href = '/' + code;
+});
+</script>
+</body>
+</html>

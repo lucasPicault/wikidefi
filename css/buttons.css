@@ -1,0 +1,28 @@
+/* buttons.css */
+button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #3700b3;
+    color: #fff;
+    box-shadow: 0 8px #1f0066;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  
+  button:active:enabled {
+    box-shadow: 0 4px #4500e6;
+    transform: translateY(4px);
+  }
+  
+  button:hover {
+    filter: brightness(1.1);
+  }
+  
+  button:disabled {
+    background: #737373;
+    box-shadow: 0 8px #363636;
+  }
+  
