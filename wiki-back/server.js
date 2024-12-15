@@ -78,6 +78,11 @@ app.get('/:sessionCode', (req, res) => {
   }
 });
 
+// Route pour https://api.wikidefi.fr/test
+app.get('/test', (req, res) => {
+  res.send('Ceci est un texte de test depuis l\'API wikidefi !');
+});
+
 // Gestionnaire global des erreurs
 app.use(globalErrorHandler);
 
