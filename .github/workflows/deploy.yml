@@ -14,6 +14,17 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    # Installer les dépendances backend et frontend localement
+    - name: Install dependencies and build locally
+      run: |
+        cd wiki-back
+        npm install
+        npm run build
+        cd ../wiki-front
+        npm install
+        npm run build
+        cd ..
+
     # Configurer SSH pour se connecter au serveur
     - name: Setup SSH
       run: |
@@ -22,25 +33,24 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
 
-    # Déployer le code sur le serveur
-    - name: Deploy code to server
+    # Déployer le code (avec les builds) sur le serveur
+    - name: Deploy code and build to server
       run: |
         rsync -avz --exclude 'node_modules' --exclude '.git' ./ a1543162@access-5016847966.webspace-host.com:~/wikidefi
 
-    # Installer les dépendances backend et frontend
-    - name: Install dependencies and build
+    # Installer les dépendances sur le serveur pour des environnements spécifiques
+    - name: Install server-specific dependencies
       run: |
         ssh a1543162@access-5016847966.webspace-host.com << 'EOF'
-        cd wikidefi/wiki-back
-        npm install
-        npm run build
+        cd ~/wikidefi/wiki-back
+        npm install --only=production
         EOF
 
-    # Lancer le backend avec pm2
+    # Démarrer ou redémarrer le backend avec pm2
     - name: Start backend with PM2
       run: |
         ssh a1543162@access-5016847966.webspace-host.com << 'EOF'
-        cd wikidefi/wiki-back
-        pm2 start server.js --name "wiki-backend"
+        cd ~/wikidefi/wiki-back
+        pm2 start server.js --name "wiki-backend" || pm2 restart "wiki-backend"
         pm2 save
         EOF
