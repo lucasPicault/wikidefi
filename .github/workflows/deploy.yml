@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production # Remplacez "production" par le nom de votre environnement
 
     steps:
     # Vérifier le code du dépôt
@@ -45,7 +46,7 @@ jobs:
     # Déployer et démarrer le serveur
     - name: Deploy and start server
       env:
-        NODE_VERSION: 20.9.0
+        NODE_VERSION: ${{ vars.NODE_VERSION }} # Récupère la variable NODE_VERSION de l'environnement
       run: |
         ssh -tt a1543162@access-5016847966.webspace-host.com << 'EOF'
         set -e
@@ -60,14 +61,14 @@ jobs:
         # Installer la version correcte de Node.js
         if [ ! -d "$HOME/.nvm" ]; then
           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         fi
 
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        nvm install $NODE_VERSION
-        nvm use $NODE_VERSION
+
+        # Installer et utiliser la version spécifiée de Node.js
+        nvm install ${NODE_VERSION} || nvm install node
+        nvm use ${NODE_VERSION}
 
         # Vérifications
         node -v
