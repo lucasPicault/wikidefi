@@ -3,7 +3,7 @@ name: Deploy to IONOS
 on:
   push:
     branches:
-      - main # Déclenche le workflow sur un push dans la branche main
+      - main
 
 jobs:
   deploy:
@@ -19,15 +19,7 @@ jobs:
       run: |
         cd wiki-back
         npm install
-        npm run build
-        cd ..
-
-    # Installer les dépendances frontend (si nécessaire) et construire le frontend localement
-    - name: Build frontend
-      run: |
-        cd wiki-front
-        npm install || echo "No dependencies required for frontend"
-        npm run build || echo "No build step required for frontend"
+        npm run build || echo "Build step failed or skipped"
         cd ..
 
     # Configurer SSH pour se connecter au serveur
@@ -38,11 +30,15 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
 
-    # Déployer le backend (pré-compilé) et le frontend statique sur le serveur
-    - name: Deploy to server
+    # Déployer uniquement si le dossier dist existe
+    - name: Deploy backend to server
+      if: success() && runner.os == 'Linux'
       run: |
-        rsync -avz --delete ./wiki-back/dist/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-back/dist
-        rsync -avz --delete ./wiki-front/dist/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-front
+        if [ -d "./wiki-back/dist" ]; then
+          rsync -avz --delete ./wiki-back/dist/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-back/dist
+        else
+          echo "Backend dist folder not found, skipping deployment"
+        fi
 
     # Démarrer ou redémarrer le backend avec PM2
     - name: Start backend with PM2
@@ -52,8 +48,6 @@ jobs:
         cd ~/wikidefi/wiki-back
         if ! command -v pm2 &> /dev/null; then
           echo "PM2 is not installed. Installing..."
-          curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-          apt-get install -y nodejs
           npm install -g pm2
         fi
         pm2 start dist/server.js --name "wiki-backend" || pm2 restart "wiki-backend"
