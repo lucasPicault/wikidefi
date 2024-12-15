@@ -14,20 +14,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Installer les dépendances backend et construire le backend localement
-    - name: Install backend dependencies and build
+    # Installer les dépendances localement
+    - name: Install backend dependencies locally
       run: |
         cd wiki-back
-        npm install
-        npm run build
-        cd ..
-
-    # Installer les dépendances frontend et construire le frontend localement (si applicable)
-    - name: Build frontend
-      run: |
-        cd wiki-front
-        npm install || echo "No dependencies required for frontend"
-        npm run build || echo "No build step required for frontend"
+        npm install --production
         cd ..
 
     # Configurer SSH pour se connecter au serveur
@@ -38,24 +29,29 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
 
-    # Déployer les fichiers backend et frontend compilés sur le serveur
-    - name: Deploy to server
+    # Archiver les fichiers du backend avec node_modules
+    - name: Archive backend files
       run: |
-        rsync -avz --delete ./wiki-back/dist/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-back/dist
-        rsync -avz --delete ./wiki-front/dist/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-front
+        tar -czf wiki-back.tar.gz wiki-back/
 
-    # Démarrer ou redémarrer le backend avec PM2
-    - name: Start backend with PM2
+    # Transférer les fichiers archivés sur le serveur
+    - name: Transfer archive to server
+      run: |
+        scp wiki-back.tar.gz a1543162@access-5016847966.webspace-host.com:~/wikidefi/
+
+    # Déployer l'application sur le serveur
+    - name: Extract archive and deploy on server
       run: |
         ssh -tt a1543162@access-5016847966.webspace-host.com << 'EOF'
         set -e
-        cd ~/wikidefi/wiki-back
+        cd ~/wikidefi
+        tar -xzf wiki-back.tar.gz
+        rm wiki-back.tar.gz
+        cd wiki-back
         if ! command -v pm2 &> /dev/null; then
           echo "PM2 is not installed. Installing..."
-          curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-          sudo apt-get install -y nodejs
           npm install -g pm2
         fi
-        pm2 start dist/server.js --name "wiki-backend" || pm2 restart "wiki-backend"
+        pm2 start server.js --name "wikidefi-backend" || pm2 restart "wikidefi-backend"
         pm2 save
         EOF
