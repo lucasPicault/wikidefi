@@ -14,52 +14,64 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Installer les dépendances localement
-    - name: Install dependencies locally
+    # Installer les dépendances et construire le backend
+    - name: Build backend
       run: |
         cd wiki-back
-        npm install --production
+        npm ci
+        npm run build
         cd ..
 
-    # Archiver les fichiers du backend
-    - name: Archive backend files
+    # Archiver les fichiers construits
+    - name: Archive build files
       run: |
         tar -czf wiki-back.tar.gz wiki-back/
 
     # Configurer SSH pour se connecter au serveur
     - name: Setup SSH
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
 
     # Transférer les fichiers archivés sur le serveur
-    - name: Transfer archive to server
+    - name: Transfer build to server
       run: |
         scp wiki-back.tar.gz a1543162@access-5016847966.webspace-host.com:~/wikidefi/
 
-    # Extraire les fichiers et démarrer le serveur avec le bon chemin Node.js
-    - name: Extract archive and start server
+    # Déployer et démarrer le serveur
+    - name: Deploy and start server
+      env:
+        NODE_VERSION: 18.20.5
       run: |
         ssh -tt a1543162@access-5016847966.webspace-host.com << 'EOF'
         set -e
+
+        # Aller dans le dossier de déploiement
         cd ~/wikidefi
+
+        # Extraire les fichiers
         tar -xzf wiki-back.tar.gz
         rm wiki-back.tar.gz
-        cd wiki-back
 
-        # Définir le chemin Node.js via NVM
-        export PATH="$HOME/.nvm/versions/node/v18.20.5/bin:$PATH"
+        # Vérifier NVM et Node.js
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install $NODE_VERSION
+        nvm use $NODE_VERSION
 
-        # Vérification des versions
+        # Vérifications
         node -v
         npm -v
 
-        # Arrêter tout serveur Node.js déjà en cours d'exécution
+        # Arrêter l'ancien serveur
         pkill -f "node server.js" || echo "No existing server process to stop."
 
-        # Démarrer le serveur avec le bon chemin Node.js
+        # Démarrer le serveur en arrière-plan
+        cd wiki-back
         nohup node server.js > output.log 2>&1 &
         echo "Server started successfully."
         EOF
