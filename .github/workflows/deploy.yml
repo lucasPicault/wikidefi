@@ -14,13 +14,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Installer les dépendances backend et frontend localement
-    - name: Install dependencies and build locally
+    # Installer les dépendances backend et construire le backend localement
+    - name: Install backend dependencies and build
       run: |
         cd wiki-back
-        npm install
-        npm run build
-        cd ../wiki-front
         npm install
         npm run build
         cd ..
@@ -33,15 +30,17 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
 
-    # Déployer le code (avec les builds) sur le serveur
-    - name: Deploy code and build to server
+    # Déployer le backend et le frontend statique sur le serveur
+    - name: Deploy backend and frontend to server
       run: |
-        rsync -avz --exclude 'node_modules' --exclude '.git' ./ a1543162@access-5016847966.webspace-host.com:~/wikidefi
+        rsync -avz --exclude 'node_modules' --exclude '.git' ./wiki-back a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-back
+        rsync -avz ./wiki-front/ a1543162@access-5016847966.webspace-host.com:~/wikidefi/wiki-front
 
-    # Installer les dépendances sur le serveur pour des environnements spécifiques
-    - name: Install server-specific dependencies
+    # Installer les dépendances backend sur le serveur pour des environnements spécifiques
+    - name: Install server-specific backend dependencies
       run: |
         ssh a1543162@access-5016847966.webspace-host.com << 'EOF'
+        set -e
         cd ~/wikidefi/wiki-back
         npm install --only=production
         EOF
@@ -50,7 +49,12 @@ jobs:
     - name: Start backend with PM2
       run: |
         ssh a1543162@access-5016847966.webspace-host.com << 'EOF'
+        set -e
         cd ~/wikidefi/wiki-back
+        if ! command -v pm2 &> /dev/null; then
+          echo "PM2 is not installed. Installing..."
+          npm install -g pm2
+        fi
         pm2 start server.js --name "wiki-backend" || pm2 restart "wiki-backend"
         pm2 save
         EOF
