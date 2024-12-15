@@ -15,11 +15,16 @@ jobs:
       uses: actions/checkout@v3
 
     # Installer les dépendances localement
-    - name: Install backend dependencies locally
+    - name: Install dependencies locally
       run: |
         cd wiki-back
         npm install --production
         cd ..
+
+    # Archiver les fichiers du backend
+    - name: Archive backend files
+      run: |
+        tar -czf wiki-back.tar.gz wiki-back/
 
     # Configurer SSH pour se connecter au serveur
     - name: Setup SSH
@@ -29,18 +34,13 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
 
-    # Archiver les fichiers du backend avec node_modules
-    - name: Archive backend files
-      run: |
-        tar -czf wiki-back.tar.gz wiki-back/
-
     # Transférer les fichiers archivés sur le serveur
     - name: Transfer archive to server
       run: |
         scp wiki-back.tar.gz a1543162@access-5016847966.webspace-host.com:~/wikidefi/
 
-    # Déployer l'application sur le serveur
-    - name: Extract archive and deploy on server
+    # Extraire les fichiers et démarrer le serveur avec nohup
+    - name: Extract archive and start server
       run: |
         ssh -tt a1543162@access-5016847966.webspace-host.com << 'EOF'
         set -e
@@ -48,10 +48,9 @@ jobs:
         tar -xzf wiki-back.tar.gz
         rm wiki-back.tar.gz
         cd wiki-back
-        if ! command -v pm2 &> /dev/null; then
-          echo "PM2 is not installed. Installing..."
-          npm install -g pm2
-        fi
-        pm2 start server.js --name "wikidefi-backend" || pm2 restart "wikidefi-backend"
-        pm2 save
+        # Arrêter tout serveur Node.js déjà en cours d'exécution
+        pkill -f "node server.js" || echo "No existing server process to stop."
+        # Démarrer le serveur en arrière-plan
+        nohup node server.js > output.log 2>&1 &
+        echo "Server started successfully."
         EOF
