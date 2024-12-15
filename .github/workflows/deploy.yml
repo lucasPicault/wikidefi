@@ -39,7 +39,7 @@ jobs:
     # Installer les dépendances backend sur le serveur pour des environnements spécifiques
     - name: Install server-specific backend dependencies
       run: |
-        ssh a1543162@access-5016847966.webspace-host.com << 'EOF'
+        ssh -t a1543162@access-5016847966.webspace-host.com << 'EOF'
         set -e
         cd ~/wikidefi/wiki-back
         npm install --only=production
