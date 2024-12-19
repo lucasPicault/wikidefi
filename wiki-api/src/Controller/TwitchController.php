@@ -78,11 +78,16 @@ class TwitchController extends AbstractController
     #[Route('/bot/configure', name: 'bot_configure', methods: ['POST'])]
     public function configureBot(Request $request): JsonResponse
     {
-        $botUsername = $request->get('botUsername');
-        $botToken = $request->get('botToken');
+        $data = json_decode($request->getContent(), true); // Décoder le JSON brut
+        $botUsername = $data['botUsername'] ?? null;
+        $botToken = $data['botToken'] ?? null;
 
+        // Log des données pour vérifier leur réception
         if (!$botUsername || !$botToken) {
-            return new JsonResponse(['error' => 'Le nom d\'utilisateur et le token du bot sont requis.'], 400);
+            return new JsonResponse([
+                'error' => 'Le nom d\'utilisateur et le token du bot sont requis.',
+                'receivedData' => $data // Ajoutez les données reçues au log
+            ], 400);
         }
 
         // Enregistrer la configuration du bot pour l'utilisateur connecté

@@ -123,7 +123,7 @@ document.getElementById('save-bot-config').addEventListener('click', async () =>
     const response = await fetch(`${API_URL}bot/configure`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ botUsername: 'Bot', botToken }),
+      body: JSON.stringify({ botUsername, botToken }),
     });
 
     const result = await response.json();
