@@ -41,9 +41,6 @@ function handleTwitchCallback() {
   const code = params.get('code');
 
   if (code) {
-    console.log('Code détecté, envoi au back-end pour échange...');
-
-    // Envoyer le code au back-end pour obtenir le token et les informations utilisateur
     fetch(`${API_URL}auth/twitch/callback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,16 +49,9 @@ function handleTwitchCallback() {
       .then(response => response.json())
       .then(data => {
         if (data.user && data.access_token) {
-          console.log('Utilisateur reçu du back-end :', data.user);
-
           // Sauvegarder les infos utilisateur dans le localStorage
           localStorage.setItem('twitch_user', JSON.stringify(data.user));
           localStorage.setItem('twitch_access_token', data.access_token);
-
-          // Nettoyer l'URL pour enlever le "code"
-          const url = new URL(window.location.href);
-          url.searchParams.delete('code');
-          window.history.replaceState(null, '', url.toString());
         } else {
           console.error('Erreur lors de la récupération des informations utilisateur :', data);
         }
@@ -207,27 +197,35 @@ document.getElementById('save-bot-config').addEventListener('click', async () =>
   if (!botToken) {
     alert("Veuillez renseigner le token du bot.");
     return;
-  } 
+  }
+
+  const twitchUser = JSON.parse(localStorage.getItem('twitch_user'));
+
+  if (!twitchUser || !twitchUser.login) {
+    alert("Utilisateur non connecté.");
+    return;
+  }
 
   try {
     const response = await fetch(`${API_URL}bot/configure`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ botUsername: "Bot", botToken }), // "Bot" est utilisé ici comme nom d'utilisateur
+      body: JSON.stringify({
+        botUsername: "Bot",
+        botToken: botToken,
+        login: twitchUser.login, // Transmet le login au back-end
+      }),
     });
 
     const result = await response.json();
-    console.log('Réponse du back-end :', result);
-
     if (response.ok) {
       document.getElementById('bot-config-status').textContent = result.message;
-      document.getElementById('test-bot-config').disabled = false;
     } else {
       alert(result.error || 'Erreur lors de la configuration du bot.');
     }
   } catch (error) {
-    console.error('Erreur lors de l\'appel au back-end :', error);
-    alert('Une erreur est survenue. Consultez la console pour plus de détails.');
+    console.error('Erreur lors de la requête vers le back-end :', error);
+    alert('Une erreur est survenue.');
   }
 });
 

@@ -99,33 +99,27 @@ class TwitchController extends AbstractController
     }
 
     #[Route('/bot/configure', name: 'bot_configure', methods: ['POST'])]
-    public function configureBot(Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $botUsername = $data['botUsername'] ?? null;
-        $botToken = $data['botToken'] ?? null;
+public function configureBot(Request $request): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+    $botUsername = $data['botUsername'] ?? null;
+    $botToken = $data['botToken'] ?? null;
+    $login = $data['login'] ?? null; // Récupérer le login depuis la requête
 
-        // Log des données pour vérifier leur réception
-        if (!$botUsername || !$botToken) {
-            return new JsonResponse([
-                'error' => 'Le nom d\'utilisateur et le token du bot sont requis.',
-                'receivedData' => $data,
-            ], 400);
-        }
-
-        // Vérifier que l'utilisateur connecté existe
-        if (empty($this->connectedUser['login'])) {
-            return new JsonResponse(['error' => 'Aucun utilisateur connecté trouvé'], 400);
-        }
-
-        // Enregistrer la configuration du bot pour l'utilisateur connecté
-        $this->botConfigs[$this->connectedUser['login']] = [
-            'botUsername' => $botUsername,
-            'botToken' => $botToken,
-        ];
-
-        return new JsonResponse(['message' => 'Configuration du bot enregistrée avec succès.']);
+    if (!$botUsername || !$botToken || !$login) {
+        return new JsonResponse([
+            'error' => 'Le nom d\'utilisateur, le token du bot et le login sont requis.',
+        ], 400);
     }
+
+    // Enregistrer la configuration du bot pour l'utilisateur connecté
+    $this->botConfigs[$login] = [
+        'botUsername' => $botUsername,
+        'botToken' => $botToken,
+    ];
+
+    return new JsonResponse(['message' => 'Configuration du bot enregistrée avec succès.']);
+}
 
     #[Route('/bot/config', name: 'bot_config', methods: ['GET'])]
     public function getBotConfig(): JsonResponse
