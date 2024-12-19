@@ -37,6 +37,7 @@ function connectToTwitch() {
 function handleTwitchCallback() {
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
+
   if (code) {
     // Envoyer le code au back-end pour obtenir le token et les informations utilisateur
     fetch(`${API_URL}auth/twitch/callback`, {
@@ -52,7 +53,7 @@ function handleTwitchCallback() {
           localStorage.setItem('twitch_access_token', data.access_token);
           console.log('Connexion réussie, utilisateur enregistré :', data.user);
 
-          // Nettoyer l'URL pour enlever le code
+          // Nettoyer l'URL pour enlever le "code"
           const url = new URL(window.location.href);
           url.searchParams.delete('code');
           window.history.replaceState(null, '', url.toString());
@@ -68,9 +69,13 @@ function handleTwitchCallback() {
 
 // Appeler la fonction de gestion au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.location.search.includes('code=')) {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.has('code')) {
+    // Si un "code" est présent dans l'URL, traiter le callback
     handleTwitchCallback();
   } else {
+    // Sinon, vérifier si l'utilisateur est connecté
     checkLogin();
   }
 });
