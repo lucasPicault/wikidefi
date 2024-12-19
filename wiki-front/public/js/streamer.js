@@ -24,7 +24,7 @@ document.getElementById('create-session').addEventListener('click', async () => 
   const normalizedEnd = endValidation.normalizedTitle;
 
   try {
-    const resp = await fetch('/session/create', {
+    const resp = await fetch('/api.php/session/create', { // Correction ici
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ start: normalizedStart, end: normalizedEnd })
@@ -59,7 +59,7 @@ document.getElementById('launch-game').addEventListener('click', async () => {
   }
 
   try {
-    const resp = await fetch('/session/launch', {
+    const resp = await fetch('/api.php/session/launch', { // Correction ici
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionCode })
@@ -85,7 +85,7 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
   }
 
   try {
-    const resp = await fetch('/session/end', {
+    const resp = await fetch('/api.php/session/end', { // Correction ici
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionCode })
@@ -108,6 +108,7 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
     console.error("Erreur lors de la fin de session :", error);
   }
 });
+
 
 // Configuration et test du bot
 document.getElementById('save-bot-config').addEventListener('click', async () => {
