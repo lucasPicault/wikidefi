@@ -259,56 +259,77 @@ function redirectToTwitchAuth() {
 }
 
 function handleTwitchCallback() {
-    $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-    $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
-    $redirectUri = 'https://api.wikidefi.fr/auth/callback';
-
-    $code = $_GET['code'] ?? null;
-    if (!$code) {
-        respondWithError("Code d'autorisation manquant.");
-    }
-
-    // Échanger le code contre un jeton d'accès
-    $url = 'https://id.twitch.tv/oauth2/token';
-    $data = [
-        'client_id' => $clientId,
-        'client_secret' => $clientSecret,
-        'code' => $code,
-        'grant_type' => 'authorization_code',
-        'redirect_uri' => $redirectUri
-    ];
-
-    $options = [
-        'http' => [
-            'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
-            'method' => 'POST',
-            'content' => http_build_query($data)
-        ]
-    ];
-    $context = stream_context_create($options);
-    $response = file_get_contents($url, false, $context);
-    $tokenData = json_decode($response, true);
-
-    if (isset($tokenData['access_token'])) {
-        $_SESSION['twitch_access_token'] = $tokenData['access_token'];
-        $_SESSION['twitch_user'] = getUserData($tokenData['access_token']);
-        header("Location: /"); // Rediriger vers la page d'accueil après la connexion
-        exit;
+    if (isset($_GET['code'])) {
+        $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi'; // Remplacez par votre Client ID Twitch
+        $clientSecret = 'VOTRE_CLIENT_SECRET'; // Remplacez par votre Client Secret Twitch
+        $redirectUri = 'https://wikidefi.fr/api/index.php/auth/callback'; // URL de redirection OAuth
+        $code = $_GET['code'];
+    
+        $url = 'https://id.twitch.tv/oauth2/token';
+    
+        $data = [
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'code' => $code,
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $redirectUri,
+        ];
+    
+        $options = [
+            CURLOPT_URL => $url,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($data),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+        ];
+    
+        $ch = curl_init();
+        curl_setopt_array($ch, $options);
+        $response = curl_exec($ch);
+        $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    
+        if ($httpStatus === 200) {
+            $tokenData = json_decode($response, true);
+            $accessToken = $tokenData['access_token'];
+            // Stockez le token en session ou base de données
+            session_start();
+            $_SESSION['access_token'] = $accessToken;
+    
+            echo 'Connexion réussie ! Vous pouvez maintenant accéder à votre compte.';
+        } else {
+            echo 'Erreur lors de la connexion à Twitch.';
+        }
     } else {
-        respondWithError("Échec de l'authentification Twitch.");
+        echo 'Erreur : Aucun code reçu.';
     }
 }
 
 function getUserData($accessToken) {
-    $url = 'https://id.twitch.tv/oauth2/validate';
-    $options = [
-        'http' => [
-            'header' => "Authorization: Bearer $accessToken"
-        ]
-    ];
-    $context = stream_context_create($options);
-    $response = file_get_contents($url, false, $context);
-    return json_decode($response, true);
+    if (isset($_SESSION['access_token'])) {
+        $accessToken = $_SESSION['access_token'];
+    
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://api.twitch.tv/helix/users');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $accessToken,
+            'Client-Id: 8x8rp1xpim5kjpywfjvrsrizsxizxi',
+        ]);
+    
+        $response = curl_exec($ch);
+        curl_close($ch);
+    
+        $userData = json_decode($response, true);
+        if (isset($userData['data'][0])) {
+            $user = $userData['data'][0];
+            echo 'Bienvenue, ' . htmlspecialchars($user['display_name']) . ' (' . htmlspecialchars($user['email']) . ')';
+        } else {
+            echo 'Impossible de récupérer vos informations.';
+        }
+    } else {
+        echo 'Utilisateur non connecté.';
+    }
 }
 
 

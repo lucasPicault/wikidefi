@@ -1,28 +1,9 @@
-(async function checkAuthStatus() {
-    try {
-        const response = await fetch('https://wikidefi.fr/php/index.php/auth/status', {
-            method: 'GET',
-            credentials: 'include', // Inclure les cookies pour les sessions
-        });
+document.getElementById('login-btn').addEventListener('click', () => {
+    const clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi'; // Remplacez par votre Client ID Twitch
+    const redirectUri = encodeURIComponent('https://wikidefi.fr/php/index.php/auth/callback'); // URL de redirection OAuth
+    const scope = encodeURIComponent('user:read:email'); // Permissions nécessaires
+    const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
 
-        if (!response.ok) {
-            throw new Error('Erreur réseau ou serveur');
-        }
-
-        const data = await response.json();
-
-        if (!data.authenticated) {
-            console.log('Redirection vers Twitch pour authentification.');
-            // Redirigez l'utilisateur directement vers l'URL d'autorisation Twitch
-            const clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-            const redirectUri = encodeURIComponent('https://wikidefi.fr/php/index.php/auth/callback');
-            const scope = encodeURIComponent('user:read:email');
-            const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
-            window.location.href = twitchAuthUrl;
-        } else {
-            console.log('Utilisateur connecté :', data.user);
-        }
-    } catch (error) {
-        console.error('Erreur lors de la vérification de l\'authentification :', error);
-    }
-})();
+    // Redirige l'utilisateur vers la page d'authentification de Twitch
+    window.location.href = authUrl;
+});
