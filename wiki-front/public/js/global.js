@@ -1,4 +1,4 @@
-const API_URL = 'https://wikidefi.fr/api';
+const API_URL = 'https://wikidefi.fr/api/';
 
 // Vérifier la connexion de l'utilisateur
 async function verifyUser() {
