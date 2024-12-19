@@ -63,7 +63,7 @@ function handleTwitchCallback() {
 
 // Appeler la fonction de gestion au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.location.pathname === '/auth/twitch/callback') {
+  if (window.location.search.includes('code=')) {
     handleTwitchCallback();
   } else {
     checkLogin();

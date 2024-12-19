@@ -31,23 +31,25 @@ class TwitchController extends AbstractController
         return new JsonResponse(['url' => $twitchAuthUrl]);
     }
 
-    #[Route('/auth/twitch/callback', name: 'auth_twitch_callback')]
+    #[Route('/auth/twitch/callback', name: 'auth_twitch_callback', methods: ['POST'])]
     public function callback(Request $request): JsonResponse
     {
-        $code = $request->get('code');
+        $data = json_decode($request->getContent(), true);
+        $code = $data['code'] ?? null;
+    
         if (!$code) {
             return new JsonResponse(['error' => 'Code is required'], 400);
         }
     
         try {
-            // Échanger le code contre un access token
+            // Échanger le code contre un token d'accès
             $response = $this->httpClient->request('POST', 'https://id.twitch.tv/oauth2/token', [
                 'body' => [
                     'client_id' => $_ENV['TWITCH_CLIENT_ID'],
                     'client_secret' => $_ENV['TWITCH_CLIENT_SECRET'],
                     'code' => $code,
                     'grant_type' => 'authorization_code',
-                    'redirect_uri' => $_ENV['TWITCH_REDIRECT_URI'],
+                    'redirect_uri' => 'https://wikidefi.fr/streamer', // Mettez ici l'URL front configurée dans Twitch
                 ],
             ]);
     
@@ -84,7 +86,7 @@ class TwitchController extends AbstractController
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
-    
+
     #[Route('/bot/configure', name: 'bot_configure', methods: ['POST'])]
     public function configureBot(Request $request): JsonResponse
     {
