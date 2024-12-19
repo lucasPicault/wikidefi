@@ -1,6 +1,6 @@
 # Activer la réécriture des URLs
 <IfModule mod_rewrite.c>
-    RewriteEngine On
+    RewriteEngine Off
 
     # Rediriger toutes les requêtes vers index.php sauf si le fichier ou le dossier existe
     RewriteCond %{REQUEST_FILENAME} !-f
