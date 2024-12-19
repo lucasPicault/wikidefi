@@ -40,18 +40,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            if [ ! -d "~/wikidefi/wiki-api" ]; then
-              echo "Cloning the repository for the first time..."
-              git clone https://github.com/lucasPicault/wikidefi.git ~/wikidefi/wiki-api
-            fi
-
-            cd ~/wikidefi/wiki-api
-
-            if [ ! -f "/usr/local/bin/composer" ]; then
-              echo "Installing Composer..."
-              curl -sS https://getcomposer.org/installer | /usr/bin/php8.3-cli
-              mv composer.phar /usr/local/bin/composer
-            fi
+            cd ~//wiki-apiwikidefi
 
             echo "Pulling latest changes..."
             git pull origin main
