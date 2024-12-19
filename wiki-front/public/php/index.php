@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Gérer les en-têtes CORS
-header("Access-Control-Allow-Origin: https://wikidefi.fr"); // Remplacez '*' par l'origine spécifique
+header("Access-Control-Allow-Origin: https://api.wikidefi.fr"); // Remplacez '*' par l'origine spécifique
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");

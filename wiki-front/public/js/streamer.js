@@ -24,7 +24,7 @@ document.getElementById('create-session').addEventListener('click', async () => 
   const normalizedEnd = endValidation.normalizedTitle;
 
   try {
-    const resp = await fetch('/api.php/session/create', { // Correction ici
+    const resp = await fetch('/session/create', { // Correction ici
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ start: normalizedStart, end: normalizedEnd })
@@ -59,7 +59,7 @@ document.getElementById('launch-game').addEventListener('click', async () => {
   }
 
   try {
-    const resp = await fetch('/api.php/session/launch', { // Correction ici
+    const resp = await fetch('/session/launch', { // Correction ici
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionCode })
@@ -85,7 +85,7 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
   }
 
   try {
-    const resp = await fetch('/api.php/session/end', { // Correction ici
+    const resp = await fetch('/session/end', { // Correction ici
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionCode })
