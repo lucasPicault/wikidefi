@@ -36,6 +36,17 @@ if ($path[0] === 'session') {
     } else {
         respondWithError("Route non trouvée.");
     }
+}
+elseif ($path[0] === 'auth') {
+    if ($requestMethod === 'GET' && $path[1] === 'login') {
+        redirectToTwitchAuth();
+    } elseif ($requestMethod === 'GET' && $path[1] === 'callback') {
+        handleTwitchCallback();
+    } elseif ($requestMethod === 'GET' && $path[1] === 'status') {
+        checkAuthStatus();
+    } else {
+        respondWithError("Route non trouvée.");
+    }
 } else {
     respondWithError("Route non trouvée.");
 }
@@ -210,4 +221,80 @@ function deleteSession($sessionCode) {
 
     unset($_SESSION['sessions'][$sessionCode]);
     respondWithSuccess(["message" => "Session supprimée avec succès."]);
+}
+
+
+function redirectToTwitchAuth() {
+    $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
+    $redirectUri = urlencode('https://wikidefi.fr/api.php/auth/callback');
+    $scopes = urlencode('user:read:email');
+    $url = "https://id.twitch.tv/oauth2/authorize?client_id=$clientId&redirect_uri=$redirectUri&response_type=code&scope=$scopes";
+
+    header("Location: $url");
+    exit;
+}
+
+function handleTwitchCallback() {
+    $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
+    $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
+    $redirectUri = 'https://wikidefi.fr/api.php/auth/callback';
+
+    $code = $_GET['code'] ?? null;
+    if (!$code) {
+        respondWithError("Code d'autorisation manquant.");
+    }
+
+    // Échanger le code contre un jeton d'accès
+    $url = 'https://id.twitch.tv/oauth2/token';
+    $data = [
+        'client_id' => $clientId,
+        'client_secret' => $clientSecret,
+        'code' => $code,
+        'grant_type' => 'authorization_code',
+        'redirect_uri' => $redirectUri
+    ];
+
+    $options = [
+        'http' => [
+            'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+            'method' => 'POST',
+            'content' => http_build_query($data)
+        ]
+    ];
+    $context = stream_context_create($options);
+    $response = file_get_contents($url, false, $context);
+    $tokenData = json_decode($response, true);
+
+    if (isset($tokenData['access_token'])) {
+        $_SESSION['twitch_access_token'] = $tokenData['access_token'];
+        $_SESSION['twitch_user'] = getUserData($tokenData['access_token']);
+        header("Location: /"); // Rediriger vers la page d'accueil après la connexion
+        exit;
+    } else {
+        respondWithError("Échec de l'authentification Twitch.");
+    }
+}
+
+function getUserData($accessToken) {
+    $url = 'https://id.twitch.tv/oauth2/validate';
+    $options = [
+        'http' => [
+            'header' => "Authorization: Bearer $accessToken"
+        ]
+    ];
+    $context = stream_context_create($options);
+    $response = file_get_contents($url, false, $context);
+    return json_decode($response, true);
+}
+
+
+function checkAuthStatus() {
+    if (!isset($_SESSION['twitch_user'])) {
+        respondWithSuccess(['authenticated' => false]);
+    } else {
+        respondWithSuccess([
+            'authenticated' => true,
+            'user' => $_SESSION['twitch_user']
+        ]);
+    }
 }

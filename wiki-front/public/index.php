@@ -27,5 +27,7 @@
             window.location.href = 'viewer';
         });
     </script>
+    <script src="js/global.js"></script>
+
 </body>
 </html>
