@@ -1,5 +1,14 @@
+<Directory /wikidefi/wiki-api/public>
+    AllowOverride All
+</Directory>
+
 # Rediriger toutes les requêtes vers index.php
-RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]
+
+# Ajouter la prise en charge de UTF-8
+AddDefaultCharset UTF-8
+
+# Désactiver l'affichage des répertoires
+Options -Indexes
