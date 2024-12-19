@@ -10,6 +10,3 @@
     }
 })();
 
-
-// Vérification au chargement
-checkAuthStatus();
