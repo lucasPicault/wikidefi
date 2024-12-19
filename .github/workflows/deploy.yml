@@ -33,6 +33,7 @@ jobs:
 
       # Étape 4: Déployer sur le serveur via SSH
       - name: Deploy to Server
+        id: deploy_step
         uses: appleboy/ssh-action@v0.1.0
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -44,15 +45,13 @@ jobs:
             composer install --no-dev --optimize-autoloader
             php bin/console cache:clear --env=prod
             php bin/console doctrine:migrations:migrate --no-interaction
-
-      # Étape 5: Gérer les permissions sur le serveur
-      - name: Set correct permissions
-        uses: appleboy/ssh-action@v0.1.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /var/www/wiki-api
             sudo chown -R www-data:www-data var/cache var/log
             sudo chmod -R 775 var/cache var/log
+
+      # Étape 5: Résumé des actions effectuées
+      - name: Log Deployment Result
+        run: |
+          echo "========================="
+          echo "Deployment completed successfully!"
+          echo "Logs from deployment:"
+          echo ${{ steps.deploy_step.outputs.stdout }}
