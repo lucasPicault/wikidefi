@@ -36,11 +36,11 @@ class TwitchController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $code = $data['code'] ?? null;
-    
+
         if (!$code) {
             return new JsonResponse(['error' => 'Code is required'], 400);
         }
-    
+
         try {
             // Échanger le code contre un token d'accès
             $response = $this->httpClient->request('POST', 'https://id.twitch.tv/oauth2/token', [
@@ -49,13 +49,17 @@ class TwitchController extends AbstractController
                     'client_secret' => $_ENV['TWITCH_CLIENT_SECRET'],
                     'code' => $code,
                     'grant_type' => 'authorization_code',
-                    'redirect_uri' => 'https://wikidefi.fr/streamer', // Mettez ici l'URL front configurée dans Twitch
+                    'redirect_uri' => $_ENV['TWITCH_REDIRECT_URI'], // Mettez ici l'URL front configurée dans Twitch
                 ],
             ]);
-    
+
             $data = $response->toArray();
-            $accessToken = $data['access_token'];
-    
+            $accessToken = $data['access_token'] ?? null;
+
+            if (!$accessToken) {
+                return new JsonResponse(['error' => 'Failed to retrieve access token'], 400);
+            }
+
             // Obtenir les informations utilisateur
             $userResponse = $this->httpClient->request('GET', 'https://api.twitch.tv/helix/users', [
                 'headers' => [
@@ -63,15 +67,20 @@ class TwitchController extends AbstractController
                     'Client-Id' => $_ENV['TWITCH_CLIENT_ID'],
                 ],
             ]);
-    
+
             $userData = $userResponse->toArray();
-    
+
             if (empty($userData['data'][0])) {
-                return new JsonResponse(['error' => 'User data not found'], 400);
+                return new JsonResponse(['error' => 'User data not found in Twitch API response'], 400);
             }
-    
+
             $user = $userData['data'][0];
-    
+
+            // Validation des clés utilisateur
+            if (!isset($user['id'], $user['login'], $user['display_name'])) {
+                return new JsonResponse(['error' => 'Missing required user information'], 400);
+            }
+
             // Retourner les informations utilisateur et le token d'accès
             return new JsonResponse([
                 'user' => [
@@ -83,6 +92,8 @@ class TwitchController extends AbstractController
                 'access_token' => $accessToken,
             ]);
         } catch (\Exception $e) {
+            // Log de l'erreur pour déboguer
+            file_put_contents('logs/twitch_errors.log', $e->getMessage() . "\n", FILE_APPEND);
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
@@ -90,7 +101,7 @@ class TwitchController extends AbstractController
     #[Route('/bot/configure', name: 'bot_configure', methods: ['POST'])]
     public function configureBot(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true); // Décoder le JSON brut
+        $data = json_decode($request->getContent(), true);
         $botUsername = $data['botUsername'] ?? null;
         $botToken = $data['botToken'] ?? null;
 
@@ -98,8 +109,13 @@ class TwitchController extends AbstractController
         if (!$botUsername || !$botToken) {
             return new JsonResponse([
                 'error' => 'Le nom d\'utilisateur et le token du bot sont requis.',
-                'receivedData' => $data // Ajoutez les données reçues au log
+                'receivedData' => $data,
             ], 400);
+        }
+
+        // Vérifier que l'utilisateur connecté existe
+        if (empty($this->connectedUser['login'])) {
+            return new JsonResponse(['error' => 'Aucun utilisateur connecté trouvé'], 400);
         }
 
         // Enregistrer la configuration du bot pour l'utilisateur connecté
