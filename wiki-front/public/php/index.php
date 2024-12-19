@@ -253,7 +253,7 @@ function redirectToTwitchAuth() {
     }
 
     $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-    $redirectUri = 'https://api.wikidefi.fr';
+    $redirectUri = 'https://wikidefi.fr/php/index.php';
     $scopes = 'user:read:email';
 
     $url = "https://id.twitch.tv/oauth2/authorize?client_id=$clientId&redirect_uri=" . urlencode($redirectUri) . "&response_type=code&scope=" . urlencode($scopes);
