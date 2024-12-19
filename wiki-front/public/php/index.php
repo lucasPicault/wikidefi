@@ -4,20 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Détecter l'origine de la requête
-$allowed_origins = ['https://wikidefi.fr', 'https://api.wikidefi.fr']; // Liste des origines autorisées
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-if (in_array($origin, $allowed_origins)) {
-    header("Access-Control-Allow-Origin: $origin");
-    header("Access-Control-Allow-Credentials: true"); // Si vous utilisez des sessions ou cookies
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-} else {
-    // Optionnel : bloquer explicitement les origines non autorisées
-    header('HTTP/1.1 403 Forbidden');
-    exit('Non autorisé');
-}  
+
     // Répondre directement aux requêtes OPTIONS (prévols)
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
         http_response_code(200);
@@ -322,14 +310,22 @@ function getUserData($accessToken) {
 
 
 function checkAuthStatus() {
+    header("Content-Type: application/json");
+    header("Access-Control-Allow-Origin: https://wikidefi.fr"); // Utiliser l'origine correcte
+    header("Access-Control-Allow-Credentials: true");
+
+    // Si l'utilisateur n'est pas connecté
     if (!isset($_SESSION['twitch_user'])) {
-        respondWithSuccess(['authenticated' => false]);
-    } else {
-        respondWithSuccess([
-            'authenticated' => true,
-            'user' => $_SESSION['twitch_user']
-        ]);
+        echo json_encode(['authenticated' => false]);
+        exit;
     }
+
+    // Si l'utilisateur est connecté
+    echo json_encode([
+        'authenticated' => true,
+        'user' => $_SESSION['twitch_user']
+    ]);
+    exit;
 }
 
 function requireAuth() {
