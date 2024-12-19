@@ -19,7 +19,7 @@ if ($path[1] === 'session') {
     } elseif ($requestMethod === 'GET' && $path[2] === 'state') {
         getSessionState($path[2] ?? null);
     } else {
-        respondWithError("Route non trouvée.");
+        respondWithError("Route non trouvée.". $path[1] . $path[2]);
     }
 } elseif ($path[1] === 'game') {
     if ($requestMethod === 'POST' && $path[2] === 'move') {
