@@ -5,10 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Gérer les en-têtes CORS
-header("Access-Control-Allow-Origin: *"); // Modifiez '*' par votre domaine, ex. 'https://wikidefi.fr' pour plus de sécurité
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization");
-    header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Origin: https://wikidefi.fr"); // Remplacez '*' par l'origine spécifique
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
     
     // Répondre directement aux requêtes OPTIONS (prévols)
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -246,12 +246,15 @@ function deleteSession($sessionCode) {
 }
 
 
-function redirectToTwitchAuth() {
-    $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-    $redirectUri = urlencode('https://wikidefi.fr/api.php/auth/callback');
-    $scopes = urlencode('user:read:email');
-    $url = "https://id.twitch.tv/oauth2/authorize?client_id=$clientId&redirect_uri=$redirectUri&response_type=code&scope=$scopes";
+unction redirectToTwitchAuth() {
+    $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi'; // Remplacez par votre client_id
+    $redirectUri = 'https://wikidefi.fr/api.php/auth/callback'; // Remplacez par votre redirect_uri
+    $scopes = 'user:read:email'; // Les permissions que vous demandez
 
+    // Génération de l'URL correcte
+    $url = "https://id.twitch.tv/oauth2/authorize?client_id=$clientId&redirect_uri=" . urlencode($redirectUri) . "&response_type=code&scope=" . urlencode($scopes);
+
+    // Redirection vers Twitch
     header("Location: $url");
     exit;
 }
