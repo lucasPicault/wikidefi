@@ -18,11 +18,7 @@ jobs:
       - name: List files in working directory
         run: ls -la
 
-      # Étape 3: Naviguer dans le dossier wiki-api
-      - name: Navigate to wiki-api directory
-        run: ls -la wiki-api
-
-      # Étape 4: Installer PHP et Composer
+      # Étape 3: Installer PHP et Composer
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -35,7 +31,7 @@ jobs:
           curl -sS https://getcomposer.org/installer | php
           php composer.phar install --no-dev --optimize-autoloader
 
-      # Étape 5: Déploiement sur le serveur (par exemple via SSH)
+      # Étape 4: Déployer sur le serveur via SSH
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.0
         with:
@@ -48,3 +44,15 @@ jobs:
             composer install --no-dev --optimize-autoloader
             php bin/console cache:clear --env=prod
             php bin/console doctrine:migrations:migrate --no-interaction
+
+      # Étape 5: Gérer les permissions sur le serveur
+      - name: Set correct permissions
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/wiki-api
+            sudo chown -R www-data:www-data var/cache var/log
+            sudo chmod -R 775 var/cache var/log
