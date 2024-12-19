@@ -243,7 +243,7 @@ function redirectToTwitchAuth() {
 function handleTwitchCallback() {
     $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
     $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
-    $redirectUri = 'https://wikidefi.fr/api.php/auth/callback';
+    $redirectUri = 'https://wikidefi.fr';
 
     $code = $_GET['code'] ?? null;
     if (!$code) {
