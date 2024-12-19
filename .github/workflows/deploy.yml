@@ -25,7 +25,7 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, pdo, pdo_mysql, curl, xml, bcmath
 
-      - name: Install Composer dependencies
+      - name: Install Composer dependencies locally
         run: |
           cd wiki-api
           curl -sS https://getcomposer.org/installer | php
@@ -33,39 +33,40 @@ jobs:
 
       # Étape 4: Déployer sur le serveur via SSH
       - name: Deploy to Server
-          uses: appleboy/ssh-action@v0.1.0
-          with:
-            host: ${{ secrets.SERVER_HOST }}
-            username: ${{ secrets.SERVER_USER }}
-            key: ${{ secrets.SSH_PRIVATE_KEY }}
-            script: |
-              if [ ! -d "~/wikidefi/wiki-api" ]; then
-                echo "Cloning the repository for the first time..."
-                git clone https://github.com/your-repo.git ~/wikidefi/wiki-api
-              fi
+        id: deploy_step
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            if [ ! -d "~/wikidefi/wiki-api" ]; then
+              echo "Cloning the repository for the first time..."
+              git clone https://github.com/your-repo.git ~/wikidefi/wiki-api
+            fi
 
-              cd ~/wikidefi/wiki-api
+            cd ~/wikidefi/wiki-api
 
-              if [ ! -f "/usr/local/bin/composer" ]; then
-                echo "Installing Composer..."
-                curl -sS https://getcomposer.org/installer | php
-                mv composer.phar /usr/local/bin/composer
-              fi
+            if [ ! -f "/usr/local/bin/composer" ]; then
+              echo "Installing Composer..."
+              curl -sS https://getcomposer.org/installer | php
+              mv composer.phar /usr/local/bin/composer
+            fi
 
-              echo "Pulling latest changes..."
-              git pull origin main
+            echo "Pulling latest changes..."
+            git pull origin main
 
-              echo "Installing dependencies..."
-              composer install --no-dev --optimize-autoloader
+            echo "Installing dependencies..."
+            composer install --no-dev --optimize-autoloader
 
-              echo "Clearing Symfony cache..."
-              php bin/console cache:clear --env=prod
+            echo "Clearing Symfony cache..."
+            php bin/console cache:clear --env=prod
 
-              echo "Applying migrations..."
-              php bin/console doctrine:migrations:migrate --no-interaction
+            echo "Applying migrations..."
+            php bin/console doctrine:migrations:migrate --no-interaction
 
-              echo "Fixing permissions..."
-              chmod -R 775 var/cache var/log
+            echo "Fixing permissions..."
+            chmod -R 775 var/cache var/log
 
       # Étape 5: Résumé des actions effectuées
       - name: Log Deployment Result
