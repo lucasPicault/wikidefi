@@ -265,8 +265,8 @@ function redirectToTwitchAuth() {
 function handleTwitchCallback() {
     if (isset($_GET['code'])) {
         $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-        $clientSecret = 'VOTRE_CLIENT_SECRET';
-        $redirectUri = 'https://api.wikidefi.fr';
+        $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
+        $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback';
         $code = $_GET['code'];
 
         $url = 'https://id.twitch.tv/oauth2/token';
