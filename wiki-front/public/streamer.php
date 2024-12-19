@@ -46,7 +46,7 @@
 </div>
 
 <script src="js/streamer.js"></script>
-<script src="js/global.js"></script>
+<script src="js/auth.js"></script>
 
 </body>
 </html>

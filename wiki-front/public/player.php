@@ -30,7 +30,7 @@
     </main>
   </div>
 <script src="js/player.js"></script>
-<script src="js/global.js"></script>
+<script src="js/auth.js"></script>
 
 </body>
 </html>
