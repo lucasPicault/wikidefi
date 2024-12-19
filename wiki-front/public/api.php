@@ -246,7 +246,7 @@ function deleteSession($sessionCode) {
 }
 
 
-unction redirectToTwitchAuth() {
+function redirectToTwitchAuth() {
     $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi'; // Remplacez par votre client_id
     $redirectUri = 'https://wikidefi.fr/api.php/auth/callback'; // Remplacez par votre redirect_uri
     $scopes = 'user:read:email'; // Les permissions que vous demandez
