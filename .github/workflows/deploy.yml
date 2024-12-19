@@ -45,8 +45,6 @@ jobs:
             composer install --no-dev --optimize-autoloader
             php bin/console cache:clear --env=prod
             php bin/console doctrine:migrations:migrate --no-interaction
-            sudo chown -R www-data:www-data var/cache var/log
-            sudo chmod -R 775 var/cache var/log
 
       # Étape 5: Résumé des actions effectuées
       - name: Log Deployment Result
