@@ -213,10 +213,12 @@ document.getElementById('save-bot-config').addEventListener('click', async () =>
     const response = await fetch(`${API_URL}bot/configure`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ botUsername, botToken }),
+      body: JSON.stringify({ botUsername: "Bot", botToken }), // "Bot" est utilisé ici comme nom d'utilisateur
     });
 
     const result = await response.json();
+    console.log('Réponse du back-end :', result);
+
     if (response.ok) {
       document.getElementById('bot-config-status').textContent = result.message;
       document.getElementById('test-bot-config').disabled = false;
@@ -224,8 +226,8 @@ document.getElementById('save-bot-config').addEventListener('click', async () =>
       alert(result.error || 'Erreur lors de la configuration du bot.');
     }
   } catch (error) {
-    console.error(error);
-    alert('Une erreur est survenue.');
+    console.error('Erreur lors de l\'appel au back-end :', error);
+    alert('Une erreur est survenue. Consultez la console pour plus de détails.');
   }
 });
 
