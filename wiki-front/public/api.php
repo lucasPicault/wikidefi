@@ -4,13 +4,12 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-$path = explode('/', trim($_SERVER['PATH_INFO'], '/'));
+$path = explode('/', trim(str_replace('api.php', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
 
-var_dump($_SERVER['PATH_INFO']);
+echo $path;
 // Routeur basique
 if ($path[1] === 'session') {
     if ($requestMethod === 'POST' && $path[2] === 'create') {
-        echo 'qsd';
         createSession();
     } elseif ($requestMethod === 'POST' && $path[2] === 'join') {
         joinSession();
