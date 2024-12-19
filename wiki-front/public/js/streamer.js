@@ -1,6 +1,76 @@
 let sessionCode = null;
 const API_URL = 'https://api.wikidefi.fr/';
 
+// Vérifier si l'utilisateur est déjà connecté
+function checkLogin() {
+  const user = localStorage.getItem('twitch_user');
+  if (user) {
+    console.log('Utilisateur connecté :', JSON.parse(user));
+    return JSON.parse(user);
+  } else {
+    connectToTwitch();
+  }
+}
+
+// Rediriger l'utilisateur vers Twitch pour se connecter
+function connectToTwitch() {
+  fetch(`${API_URL}/auth/twitch`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.url) {
+        window.location.href = data.url; // Redirection vers Twitch
+      } else {
+        console.error('Erreur lors de la récupération de l’URL de connexion Twitch.');
+      }
+    })
+    .catch(error => {
+      console.error('Erreur :', error);
+    });
+}
+
+// Gestion du callback après connexion
+function handleTwitchCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  if (code) {
+    // Envoyer le code au back-end pour obtenir les infos utilisateur
+    fetch(`${API_URL}/auth/twitch/callback?code=${code}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.user && data.access_token) {
+          // Sauvegarder les infos utilisateur et le token dans le localStorage
+          localStorage.setItem('twitch_user', JSON.stringify(data.user));
+          localStorage.setItem('twitch_access_token', data.access_token);
+          console.log('Connexion réussie, utilisateur enregistré :', data.user);
+
+          // Nettoyer l'URL pour enlever le code
+          const url = new URL(window.location.href);
+          url.searchParams.delete('code');
+          window.history.replaceState(null, '', url.toString());
+        } else {
+          console.error('Erreur lors de la récupération des informations utilisateur.', data);
+        }
+      })
+      .catch(error => {
+        console.error('Erreur :', error);
+      });
+  }
+}
+
+// Appeler la fonction de gestion au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.location.pathname === '/auth/twitch/callback') {
+    handleTwitchCallback();
+  } else {
+    checkLogin();
+  }
+});
+
+//--------------------
+//-----LOGIN--FIN-----
+//--------------------
+
+
 // Création de la session
 document.getElementById('create-session').addEventListener('click', async () => {
   const startInput = document.getElementById('start-page').value.trim();
@@ -117,7 +187,7 @@ document.getElementById('save-bot-config').addEventListener('click', async () =>
   if (!botToken) {
     alert("Veuillez renseigner le token du bot.");
     return;
-  }
+  } 
 
   try {
     const response = await fetch(`${API_URL}bot/configure`, {

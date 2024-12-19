@@ -38,9 +38,9 @@ class TwitchController extends AbstractController
         if (!$code) {
             return new JsonResponse(['error' => 'Code is required'], 400);
         }
-
+    
         try {
-            // Échanger le code contre un token d'accès
+            // Échanger le code contre un access token
             $response = $this->httpClient->request('POST', 'https://id.twitch.tv/oauth2/token', [
                 'body' => [
                     'client_id' => $_ENV['TWITCH_CLIENT_ID'],
@@ -50,31 +50,41 @@ class TwitchController extends AbstractController
                     'redirect_uri' => $_ENV['TWITCH_REDIRECT_URI'],
                 ],
             ]);
-
+    
             $data = $response->toArray();
             $accessToken = $data['access_token'];
-
-            // Récupérer les informations utilisateur
+    
+            // Obtenir les informations utilisateur
             $userResponse = $this->httpClient->request('GET', 'https://api.twitch.tv/helix/users', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $accessToken,
                     'Client-Id' => $_ENV['TWITCH_CLIENT_ID'],
                 ],
-            ])->toArray();
-
-            $user = $userResponse['data'][0];
-            $this->connectedUser = [
-                'id' => $user['id'],
-                'login' => $user['login'],
-                'display_name' => $user['display_name'],
-            ];
-
-            return new JsonResponse($this->connectedUser);
+            ]);
+    
+            $userData = $userResponse->toArray();
+    
+            if (empty($userData['data'][0])) {
+                return new JsonResponse(['error' => 'User data not found'], 400);
+            }
+    
+            $user = $userData['data'][0];
+    
+            // Retourner les informations utilisateur et le token d'accès
+            return new JsonResponse([
+                'user' => [
+                    'id' => $user['id'],
+                    'login' => $user['login'],
+                    'display_name' => $user['display_name'],
+                    'email' => $user['email'] ?? null,
+                ],
+                'access_token' => $accessToken,
+            ]);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
-
+    
     #[Route('/bot/configure', name: 'bot_configure', methods: ['POST'])]
     public function configureBot(Request $request): JsonResponse
     {
