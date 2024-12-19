@@ -7,15 +7,17 @@ function checkLogin() {
   const params = new URLSearchParams(window.location.search);
 
   if (user) {
-    console.log('Utilisateur connecté :', JSON.parse(user));
+    console.log('Utilisateur connecté trouvé :', JSON.parse(user));
     return JSON.parse(user);
   }
 
-  // Ne pas rediriger si un paramètre "code" existe
+  // Si aucun utilisateur n'est trouvé et aucun code n'est présent, redirige vers Twitch
   if (!params.has('code')) {
+    console.log('Aucun utilisateur connecté, redirection vers Twitch...');
     connectToTwitch();
   }
 }
+
 
 // Rediriger l'utilisateur vers Twitch pour se connecter
 function connectToTwitch() {
@@ -39,6 +41,8 @@ function handleTwitchCallback() {
   const code = params.get('code');
 
   if (code) {
+    console.log('Code détecté, envoi au back-end pour échange...');
+
     // Envoyer le code au back-end pour obtenir le token et les informations utilisateur
     fetch(`${API_URL}auth/twitch/callback`, {
       method: 'POST',
@@ -48,35 +52,37 @@ function handleTwitchCallback() {
       .then(response => response.json())
       .then(data => {
         if (data.user && data.access_token) {
+          console.log('Utilisateur reçu du back-end :', data.user);
+
           // Sauvegarder les infos utilisateur dans le localStorage
           localStorage.setItem('twitch_user', JSON.stringify(data.user));
           localStorage.setItem('twitch_access_token', data.access_token);
-          console.log('Connexion réussie, utilisateur enregistré :', data.user);
 
           // Nettoyer l'URL pour enlever le "code"
           const url = new URL(window.location.href);
           url.searchParams.delete('code');
           window.history.replaceState(null, '', url.toString());
         } else {
-          console.error('Erreur lors de la récupération des informations utilisateur.', data);
+          console.error('Erreur lors de la récupération des informations utilisateur :', data);
         }
       })
       .catch(error => {
-        console.error('Erreur :', error);
+        console.error('Erreur lors de l\'appel au back-end :', error);
       });
   }
 }
+
 
 // Appeler la fonction de gestion au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
 
   if (params.has('code')) {
-    // Si un "code" est présent dans l'URL, traiter le callback
-    handleTwitchCallback();
+    console.log('Code détecté dans l\'URL, traitement...');
+    handleTwitchCallback(); // Traite le paramètre code
   } else {
-    // Sinon, vérifier si l'utilisateur est connecté
-    checkLogin();
+    console.log('Aucun code détecté, vérification de la connexion...');
+    checkLogin(); // Vérifie si l'utilisateur est connecté
   }
 });
 
