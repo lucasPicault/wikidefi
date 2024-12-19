@@ -6,7 +6,7 @@ header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim($_SERVER['PATH_INFO'], '/'));
 
-
+var_dump($_SERVER['PATH_INFO']);
 // Routeur basique
 if ($path[1] === 'session') {
     if ($requestMethod === 'POST' && $path[2] === 'create') {
