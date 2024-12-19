@@ -4,10 +4,15 @@ const API_URL = 'https://api.wikidefi.fr/';
 // Vérifier si l'utilisateur est déjà connecté
 function checkLogin() {
   const user = localStorage.getItem('twitch_user');
+  const params = new URLSearchParams(window.location.search);
+
   if (user) {
     console.log('Utilisateur connecté :', JSON.parse(user));
     return JSON.parse(user);
-  } else {
+  }
+
+  // Ne pas rediriger si un paramètre "code" existe
+  if (!params.has('code')) {
     connectToTwitch();
   }
 }
