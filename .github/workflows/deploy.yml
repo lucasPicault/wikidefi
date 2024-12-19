@@ -43,10 +43,11 @@ jobs:
             cd ~/wikidefi/wiki-api
 
             echo "Pulling latest changes..."
+            git config --global pull.rebase false
             git pull origin main
 
             echo "Installing dependencies..."
-            composer install --no-dev --optimize-autoloader
+            /usr/bin/php8.3-cli ~/composer install --no-dev --optimize-autoloader
 
             echo "Clearing Symfony cache..."
             /usr/bin/php8.3-cli bin/console cache:clear --env=prod
