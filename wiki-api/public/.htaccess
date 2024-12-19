@@ -1,8 +1,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Assure que les requêtes sont redirigées correctement
+    # Assure que toutes les requêtes passent par index.php
+    RewriteCond %{REQUEST_URI} !^/index\.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php [QSA,L]
+    RewriteRule ^(.*)$ /index.php [QSA,L]
 </IfModule>
