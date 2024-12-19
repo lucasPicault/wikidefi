@@ -24,6 +24,6 @@ DirectoryIndex index.php
 
 <IfModule !mod_rewrite.c>
     <IfModule mod_alias.c>
-        RedirectMatch 307 ^/$ /index.php/
+        RedirectMatch 307 ^/$ /
     </IfModule>
 </IfModule>
