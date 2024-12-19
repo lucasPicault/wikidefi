@@ -2,10 +2,10 @@
     RewriteEngine On
     RewriteBase /
 
-    # Si le fichier ou dossier existe, ne pas réécrire
+    # Ignorer les requêtes contenant déjà index.php
+    RewriteCond %{REQUEST_URI} !^/index\.php
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-
-    # Réécrit toutes les autres requêtes vers index.php
     RewriteRule ^(.*)$ index.php [QSA,L]
 </IfModule>
