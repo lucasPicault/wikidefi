@@ -1,6 +1,6 @@
 (async function checkAuthStatus() {
     try {
-        const response = await fetch('https://api.wikidefi.fr/auth/status', {
+        const response = await fetch('/api/index.php/auth/status', {
             method: 'GET',
             credentials: 'include', // Inclure les cookies pour les sessions
         });
