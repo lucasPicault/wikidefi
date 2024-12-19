@@ -1,4 +1,5 @@
 let sessionCode = null;
+const API_URL = 'https://api.wikidefi.fr/';
 
 // Création de la session
 document.getElementById('create-session').addEventListener('click', async () => {
@@ -24,7 +25,7 @@ document.getElementById('create-session').addEventListener('click', async () => 
   const normalizedEnd = endValidation.normalizedTitle;
 
   try {
-    const resp = await fetch('/session/create', {
+    const resp = await fetch(`${API_URL}/session/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ start: normalizedStart, end: normalizedEnd })
@@ -59,7 +60,7 @@ document.getElementById('launch-game').addEventListener('click', async () => {
   }
 
   try {
-    const resp = await fetch('/session/launch', {
+    const resp = await fetch(`${API_URL}session/launch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionCode })
@@ -85,7 +86,7 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
   }
 
   try {
-    const resp = await fetch('/session/end', {
+    const resp = await fetch(`${API_URL}session/end`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionCode })
@@ -111,36 +112,36 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
 
 // Configuration et test du bot
 document.getElementById('save-bot-config').addEventListener('click', async () => {
-  const botUsername = document.getElementById('bot-username').value.trim();
-  const botToken = document.getElementById('bot-token').value.trim();
+  const botToken = document.getElementById('bot-token').value;
 
-  if (!botUsername || !botToken) {
-    document.getElementById('bot-config-status').innerText = "Veuillez remplir tous les champs.";
+  if (!botToken) {
+    alert("Veuillez renseigner le token du bot.");
     return;
   }
 
   try {
-    const resp = await fetch('/bot/configure', {
+    const response = await fetch(`${API_URL}bot/configure`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ botUsername, botToken }),
+      body: JSON.stringify({ botUsername: 'Bot', botToken }),
     });
 
-    if (resp.ok) {
-      document.getElementById('bot-config-status').innerText = "Configuration enregistrée avec succès.";
-      document.getElementById('test-bot-config').disabled = false; // Activer le bouton tester
+    const result = await response.json();
+    if (response.ok) {
+      document.getElementById('bot-config-status').textContent = result.message;
+      document.getElementById('test-bot-config').disabled = false;
     } else {
-      const error = await resp.json();
-      document.getElementById('bot-config-status').innerText = "Erreur : " + error.error;
+      alert(result.error || 'Erreur lors de la configuration du bot.');
     }
   } catch (error) {
-    console.error("Erreur lors de l'enregistrement du bot :", error);
+    console.error(error);
+    alert('Une erreur est survenue.');
   }
 });
 
 document.getElementById('test-bot-config').addEventListener('click', async () => {
   try {
-    const resp = await fetch('/bot/test', { method: 'POST' });
+    const resp = await fetch(`${API_URL}bot/test`, { method: 'POST' });
 
     if (resp.ok) {
       document.getElementById('bot-config-status').innerText = "Le bot a envoyé un message de test avec succès.";
