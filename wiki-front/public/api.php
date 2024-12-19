@@ -8,31 +8,31 @@ $path = explode('/', trim(str_replace('api.php', '', parse_url($_SERVER['REQUEST
 
 var_dump($path);
 // Routeur basique
-if ($path[1] === 'session') {
-    if ($requestMethod === 'POST' && $path[2] === 'create') {
+if ($path[0] === 'session') {
+    if ($requestMethod === 'POST' && $path[1] === 'create') {
         createSession();
-    } elseif ($requestMethod === 'POST' && $path[2] === 'join') {
+    } elseif ($requestMethod === 'POST' && $path[1] === 'join') {
         joinSession();
-    } elseif ($requestMethod === 'POST' && $path[2] === 'launch') {
+    } elseif ($requestMethod === 'POST' && $path[1] === 'launch') {
         launchSession();
-    } elseif ($requestMethod === 'POST' && $path[2] === 'end') {
+    } elseif ($requestMethod === 'POST' && $path[1] === 'end') {
         endSession();
-    } elseif ($requestMethod === 'GET' && $path[2] === 'state') {
-        getSessionState($path[2] ?? null);
+    } elseif ($requestMethod === 'GET' && $path[1] === 'state') {
+        getSessionState($path[1] ?? null);
     } else {
-        respondWithError("Route non trouvée.". $path[1] . $path[2]);
+        respondWithError("Route non trouvée.". $path[0] . $path[1]);
     }
-} elseif ($path[1] === 'game') {
-    if ($requestMethod === 'POST' && $path[2] === 'move') {
-        makeMove($path[2]);
+} elseif ($path[0] === 'game') {
+    if ($requestMethod === 'POST' && $path[1] === 'move') {
+        makeMove($path[1]);
     } elseif ($requestMethod === 'GET') {
-        getGameDetails($path[2]);
+        getGameDetails($path[1]);
     } else {
         respondWithError("Route non trouvée.");
     }
-} elseif ($path[1] === 'scoreboard') {
+} elseif ($path[0] === 'scoreboard') {
     if ($requestMethod === 'GET') {
-        getScoreboard($path[2] ?? null);
+        getScoreboard($path[1] ?? null);
     } else {
         respondWithError("Route non trouvée.");
     }
