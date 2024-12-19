@@ -14,7 +14,7 @@ function checkLogin() {
 
 // Rediriger l'utilisateur vers Twitch pour se connecter
 function connectToTwitch() {
-  fetch(`${API_URL}/auth/twitch`)
+  fetch(`${API_URL}auth/twitch`)
     .then(response => response.json())
     .then(data => {
       if (data.url) {
@@ -34,7 +34,7 @@ function handleTwitchCallback() {
   const code = params.get('code');
   if (code) {
     // Envoyer le code au back-end pour obtenir les infos utilisateur
-    fetch(`${API_URL}/auth/twitch/callback?code=${code}`)
+    fetch(`${API_URL}auth/twitch/callback?code=${code}`)
       .then(response => response.json())
       .then(data => {
         if (data.user && data.access_token) {
@@ -95,7 +95,7 @@ document.getElementById('create-session').addEventListener('click', async () => 
   const normalizedEnd = endValidation.normalizedTitle;
 
   try {
-    const resp = await fetch(`${API_URL}/session/create`, {
+    const resp = await fetch(`${API_URL}session/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ start: normalizedStart, end: normalizedEnd })
