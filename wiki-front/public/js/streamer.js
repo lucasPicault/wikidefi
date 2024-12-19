@@ -33,12 +33,16 @@ function handleTwitchCallback() {
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
   if (code) {
-    // Envoyer le code au back-end pour obtenir les infos utilisateur
-    fetch(`${API_URL}auth/twitch/callback?code=${code}`)
+    // Envoyer le code au back-end pour obtenir le token et les informations utilisateur
+    fetch(`${API_URL}auth/twitch/callback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    })
       .then(response => response.json())
       .then(data => {
         if (data.user && data.access_token) {
-          // Sauvegarder les infos utilisateur et le token dans le localStorage
+          // Sauvegarder les infos utilisateur dans le localStorage
           localStorage.setItem('twitch_user', JSON.stringify(data.user));
           localStorage.setItem('twitch_access_token', data.access_token);
           console.log('Connexion réussie, utilisateur enregistré :', data.user);
