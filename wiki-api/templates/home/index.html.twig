@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Commandes</title>
+</head>
+<body>
+    <h1>Wiki des Commandes</h1>
+    <p>Voici la liste des routes disponibles dans cette API :</p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Méthode</th>
+                <th>Route</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for command in commands %}
+                <tr>
+                    <td>{{ command.method }}</td>
+                    <td>{{ command.route }}</td>
+                    <td>{{ command.description }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
