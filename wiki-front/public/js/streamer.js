@@ -1,5 +1,4 @@
 let sessionCode = null;
-const API_URL = '';
 
 // Création de la session
 document.getElementById('create-session').addEventListener('click', async () => {
@@ -11,32 +10,46 @@ document.getElementById('create-session').addEventListener('click', async () => 
     return;
   }
 
+  // Validation des pages
+  const startValidation = await validateWikipediaPage(startInput);
+  const endValidation = await validateWikipediaPage(endInput);
+
+  if (!startValidation.valid || !endValidation.valid) {
+    alert("Une ou plusieurs des pages saisies n'existent pas sur Wikipedia. Veuillez vérifier vos entrées.");
+    return;
+  }
+
+  // Récupération des titres normalisés et des URLs
+  const normalizedStart = startValidation.normalizedTitle;
+  const normalizedEnd = endValidation.normalizedTitle;
+
   try {
-    const response = await fetch(`${API_URL}session/create`, {
+    const resp = await fetch('/session/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start: startInput, end: endInput }),
+      body: JSON.stringify({ start: normalizedStart, end: normalizedEnd })
     });
 
-    if (response.ok) {
-      const data = await response.json();
+    if (resp.ok) {
+      const data = await resp.json();
       sessionCode = data.sessionCode;
 
+      // Mise à jour de l'interface avec les informations de session
       document.getElementById('session-info').innerHTML = `
-        <strong>Session créée</strong>: ${sessionCode}<br>
-        <strong>Page de départ</strong>: ${startInput}<br>
-        <strong>Page d'arrivée</strong>: ${endInput}
+        <strong>Session créée</strong>: ${data.sessionCode}<br>
+        <strong>Page de départ</strong>: <a href="${startValidation.pageUrl}" target="_blank">${normalizedStart}</a><br>
+        <strong>Page d'arrivée</strong>: <a href="${endValidation.pageUrl}" target="_blank">${normalizedEnd}</a>
       `;
-      toggleSessionCreation(false);
+      toggleSessionCreation(false); // Désactiver la création et afficher les options de gestion
     } else {
-      const error = await response.json();
+      const error = await resp.json();
       alert("Erreur : " + error.error);
     }
   } catch (error) {
-    console.error("Erreur lors de la création de session :", error);
+    console.error("Erreur lors de la requête fetch :", error);
+    alert("Une erreur est survenue. Consultez la console pour plus de détails.");
   }
 });
-
 
 // Lancer la partie
 document.getElementById('launch-game').addEventListener('click', async () => {
@@ -46,23 +59,23 @@ document.getElementById('launch-game').addEventListener('click', async () => {
   }
 
   try {
-    const response = await fetch(`${API_URL}session/launch`, {
+    const resp = await fetch('/session/launch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionCode }),
+      body: JSON.stringify({ sessionCode })
     });
 
-    if (response.ok) {
+    if (resp.ok) {
       alert("La partie est maintenant lancée !");
+      onSessionStarted(); // Activer le bouton "Fin de partie"
     } else {
-      const error = await response.json();
+      const error = await resp.json();
       alert("Erreur : " + error.error);
     }
   } catch (error) {
     console.error("Erreur lors du lancement :", error);
   }
 });
-
 
 // Terminer la session
 document.getElementById('end-session-btn').addEventListener('click', async () => {
@@ -72,21 +85,23 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
   }
 
   try {
-    const response = await fetch(`${API_URL}session/end`, {
+    const resp = await fetch('/session/end', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionCode }),
+      body: JSON.stringify({ sessionCode })
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      alert(data.message);
+    if (resp.ok) {
+      const data = await resp.json();
+      alert(data.message); // Notification pour le streamer
 
+      // Réinitialiser l'interface
       sessionCode = null;
       document.getElementById('session-info').innerText = "";
-      toggleSessionCreation(true);
+      toggleSessionCreation(true); // Réactiver la création
+      disableButtons(); // Désactiver les boutons inutiles
     } else {
-      const error = await response.json();
+      const error = await resp.json();
       alert("Erreur : " + error.error);
     }
   } catch (error) {
@@ -94,49 +109,38 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
   }
 });
 
-
 // Configuration et test du bot
 document.getElementById('save-bot-config').addEventListener('click', async () => {
-  const botToken = document.getElementById('bot-token').value;
+  const botUsername = document.getElementById('bot-username').value.trim();
+  const botToken = document.getElementById('bot-token').value.trim();
 
-  if (!botToken) {
-    alert("Veuillez renseigner le token du bot.");
-    return;
-  }
-
-  const twitchUser = JSON.parse(localStorage.getItem('twitch_user'));
-
-  if (!twitchUser || !twitchUser.login) {
-    alert("Utilisateur non connecté.");
+  if (!botUsername || !botToken) {
+    document.getElementById('bot-config-status').innerText = "Veuillez remplir tous les champs.";
     return;
   }
 
   try {
-    const response = await fetch(`${API_URL}bot/configure`, {
+    const resp = await fetch('/bot/configure', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        botUsername: "Bot",
-        botToken: botToken,
-        login: twitchUser.login, // Transmet le login au back-end
-      }),
+      body: JSON.stringify({ botUsername, botToken }),
     });
 
-    const result = await response.json();
-    if (response.ok) {
-      document.getElementById('bot-config-status').textContent = result.message;
+    if (resp.ok) {
+      document.getElementById('bot-config-status').innerText = "Configuration enregistrée avec succès.";
+      document.getElementById('test-bot-config').disabled = false; // Activer le bouton tester
     } else {
-      alert(result.error || 'Erreur lors de la configuration du bot.');
+      const error = await resp.json();
+      document.getElementById('bot-config-status').innerText = "Erreur : " + error.error;
     }
   } catch (error) {
-    console.error('Erreur lors de la requête vers le back-end :', error);
-    alert('Une erreur est survenue.');
+    console.error("Erreur lors de l'enregistrement du bot :", error);
   }
 });
 
 document.getElementById('test-bot-config').addEventListener('click', async () => {
   try {
-    const resp = await fetch(`${API_URL}bot/test`, { method: 'POST' });
+    const resp = await fetch('/bot/test', { method: 'POST' });
 
     if (resp.ok) {
       document.getElementById('bot-config-status').innerText = "Le bot a envoyé un message de test avec succès.";
