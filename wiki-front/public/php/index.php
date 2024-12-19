@@ -4,12 +4,20 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Gérer les en-têtes CORS
-header("Access-Control-Allow-Origin: https://api.wikidefi.fr"); // Remplacez '*' par l'origine spécifique
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
-    
+// Détecter l'origine de la requête
+$allowed_origins = ['https://wikidefi.fr', 'https://api.wikidefi.fr']; // Liste des origines autorisées
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: $origin");
+    header("Access-Control-Allow-Credentials: true"); // Si vous utilisez des sessions ou cookies
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+} else {
+    // Optionnel : bloquer explicitement les origines non autorisées
+    header('HTTP/1.1 403 Forbidden');
+    exit('Non autorisé');
+}  
     // Répondre directement aux requêtes OPTIONS (prévols)
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
         http_response_code(200);
