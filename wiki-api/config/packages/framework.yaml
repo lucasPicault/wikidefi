@@ -1,10 +1,16 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
+    csrf_protection: ~
+    http_method_override: true
     secret: '%env(APP_SECRET)%'
-
+    trusted_hosts: ~
     # Note that the session will be started ONLY if you read or write from it.
     session: true
-
+    cors:
+        allow_origin: ['https://wikidefi.fr'] # URL du front
+        allow_headers: ['Content-Type', 'Authorization']
+        allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+        max_age: 3600
     #esi: true
     #fragments: true
 
