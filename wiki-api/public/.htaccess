@@ -1,8 +1,7 @@
-<Directory /wikidefi/wiki-api/public>
-    AllowOverride All
-</Directory>
+# Activer la réécriture des URL
+RewriteEngine On
 
-# Rediriger toutes les requêtes vers index.php
+# Rediriger les requêtes si ce n'est ni un fichier ni un dossier
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]
