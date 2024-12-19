@@ -246,27 +246,30 @@ function deleteSession($sessionCode) {
 
 
 function redirectToTwitchAuth() {
-    $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi'; // Remplacez par votre client_id
-    $redirectUri = 'https://wikidefi.fr/api.php/auth/callback'; // Remplacez par votre redirect_uri
-    $scopes = 'user:read:email'; // Les permissions que vous demandez
+    session_start();
+    if (isset($_SESSION['twitch_user'])) {
+        // L'utilisateur est déjà connecté, pas besoin de rediriger
+        return;
+    }
 
-    // Génération de l'URL correcte
+    $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
+    $redirectUri = 'https://api.wikidefi.fr';
+    $scopes = 'user:read:email';
+
     $url = "https://id.twitch.tv/oauth2/authorize?client_id=$clientId&redirect_uri=" . urlencode($redirectUri) . "&response_type=code&scope=" . urlencode($scopes);
 
-    // Redirection vers Twitch
     header("Location: $url");
     exit;
 }
 
 function handleTwitchCallback() {
     if (isset($_GET['code'])) {
-        $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi'; // Remplacez par votre Client ID Twitch
-        $clientSecret = 'VOTRE_CLIENT_SECRET'; // Remplacez par votre Client Secret Twitch
-        $redirectUri = 'https://wikidefi.fr/api/index.php/auth/callback'; // URL de redirection OAuth
+        $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
+        $clientSecret = 'VOTRE_CLIENT_SECRET';
+        $redirectUri = 'https://api.wikidefi.fr';
         $code = $_GET['code'];
-    
+
         $url = 'https://id.twitch.tv/oauth2/token';
-    
         $data = [
             'client_id' => $clientId,
             'client_secret' => $clientSecret,
@@ -274,7 +277,7 @@ function handleTwitchCallback() {
             'grant_type' => 'authorization_code',
             'redirect_uri' => $redirectUri,
         ];
-    
+
         $options = [
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
@@ -282,24 +285,43 @@ function handleTwitchCallback() {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
         ];
-    
+
         $ch = curl_init();
         curl_setopt_array($ch, $options);
         $response = curl_exec($ch);
         $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-    
+
         if ($httpStatus === 200) {
             $tokenData = json_decode($response, true);
             $accessToken = $tokenData['access_token'];
-            // Stockez le token en session ou base de données
-            session_start();
-            $_SESSION['access_token'] = $accessToken;
-    
-            echo 'Connexion réussie ! Vous pouvez maintenant accéder à votre compte.';
-        } else {
-            echo 'Erreur lors de la connexion à Twitch.';
+
+            // Récupération des informations utilisateur
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'https://api.twitch.tv/helix/users');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $accessToken,
+                'Client-Id: ' . $clientId,
+            ]);
+
+            $userResponse = curl_exec($ch);
+            curl_close($ch);
+
+            $userData = json_decode($userResponse, true);
+
+            if (isset($userData['data'][0])) {
+                session_start();
+                $_SESSION['twitch_user'] = $userData['data'][0];
+                $_SESSION['access_token'] = $accessToken;
+
+                // Redirigez vers la page d'accueil ou une autre page
+                header("Location: /");
+                exit;
+            }
         }
+
+        echo 'Erreur lors de la connexion à Twitch.';
     } else {
         echo 'Erreur : Aucun code reçu.';
     }
@@ -335,16 +357,16 @@ function getUserData($accessToken) {
 
 function checkAuthStatus() {
     header("Content-Type: application/json");
-    header("Access-Control-Allow-Origin: https://wikidefi.fr"); // Utiliser l'origine correcte
+    header("Access-Control-Allow-Origin: https://api.wikidefi.fr"); // Utilisez l'origine correcte
     header("Access-Control-Allow-Credentials: true");
 
-    // Si l'utilisateur n'est pas connecté
+    session_start(); // Assurez-vous que la session est démarrée
+
     if (!isset($_SESSION['twitch_user'])) {
         echo json_encode(['authenticated' => false]);
         exit;
     }
 
-    // Si l'utilisateur est connecté
     echo json_encode([
         'authenticated' => true,
         'user' => $_SESSION['twitch_user']
