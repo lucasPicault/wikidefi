@@ -1,9 +1,9 @@
-name: Deploy Symfony to Production
+name: Deploy Symfony API to Production
 
 on:
   push:
     branches:
-      - main  # Déclenche le déploiement sur la branche 'main'
+      - main
 
 jobs:
   deploy:
@@ -14,24 +14,28 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
-      # Étape 2: Installer PHP et Composer
+      # Étape 2: Lister les fichiers pour vérifier l'arborescence
+      - name: List files in working directory
+        run: ls -la
+
+      # Étape 3: Naviguer dans le dossier wiki-api
+      - name: Navigate to wiki-api directory
+        run: ls -la wiki-api
+
+      # Étape 4: Installer PHP et Composer
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'  # Utilisez la version de PHP que vous souhaitez
+          php-version: '8.1'
           extensions: mbstring, pdo, pdo_mysql, curl, xml, bcmath
-          coverage: none
 
       - name: Install Composer dependencies
         run: |
+          cd wiki-api
           curl -sS https://getcomposer.org/installer | php
           php composer.phar install --no-dev --optimize-autoloader
 
-      # Étape 3: Configurer les variables d'environnement
-      - name: Set environment variables
-        run: echo "APP_ENV=prod" >> .env
-
-      # Étape 4: Déployer l'application sur le serveur via SSH
+      # Étape 5: Déploiement sur le serveur (par exemple via SSH)
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.0
         with:
@@ -39,10 +43,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/my-symfony-app
+            cd /var/www/wiki-api
             git pull origin main
             composer install --no-dev --optimize-autoloader
-            php bin/console doctrine:migrations:migrate --no-interaction
             php bin/console cache:clear --env=prod
-            php bin/console assets:install --env=prod
-            sudo systemctl restart nginx  # Si vous utilisez Nginx
+            php bin/console doctrine:migrations:migrate --no-interaction
