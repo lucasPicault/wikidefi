@@ -9,19 +9,20 @@ $path = explode('/', trim(str_replace('api.php', '', parse_url($_SERVER['REQUEST
 
 // Routeur basique
 if ($path[0] === 'session') {
-    if ($requestMethod === 'POST' && $path[1] === 'create') {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'create') {
         createSession();
-    } elseif ($requestMethod === 'POST' && $path[1] === 'join') {
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'join') {
         joinSession();
-    } elseif ($requestMethod === 'POST' && $path[1] === 'launch') {
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'launch') {
         launchSession();
-    } elseif ($requestMethod === 'POST' && $path[1] === 'end') {
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'end') {
         endSession();
-    } elseif ($requestMethod === 'GET' && $path[1] === 'state') {
-        getSessionState($path[1] ?? null);
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && $path[1] === 'state') {
+        getSessionState($path[2] ?? null);
     } else {
-        respondWithError("Route non trouvée.". $path[0] . $path[1]);
+        respondWithError("Route non trouvée.");
     }
+
 } elseif ($path[0] === 'game') {
     if ($requestMethod === 'POST' && $path[1] === 'move') {
         makeMove($path[1]);
