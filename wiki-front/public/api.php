@@ -6,14 +6,11 @@ header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim($_SERVER['PATH_INFO'], '/'));
 
-if (empty($path[0])) {
-    respondWithSuccess(["message" => "API fonctionnelle."]);
-}
-
 
 // Routeur basique
 if ($path[1] === 'session') {
     if ($requestMethod === 'POST' && $path[2] === 'create') {
+        echo 'qsd';
         createSession();
     } elseif ($requestMethod === 'POST' && $path[2] === 'join') {
         joinSession();
