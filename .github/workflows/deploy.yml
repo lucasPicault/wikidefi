@@ -1,66 +1,48 @@
-name: Deploy to IONOS
+name: Deploy Symfony to Production
 
 on:
   push:
     branches:
-      - main
+      - main  # Déclenche le déploiement sur la branche 'main'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production # Remplacez "production" par le nom de votre environnement
 
     steps:
-    # Vérifier le code du dépôt
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Étape 1: Cloner le dépôt
+      - name: Checkout the repository
+        uses: actions/checkout@v3
 
-    # Installer les dépendances et construire le backend
-    - name: Build backend
-      run: |
-        cd wiki-back
-        npm ci
-        npm run build
-        cd ..
+      # Étape 2: Installer PHP et Composer
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'  # Utilisez la version de PHP que vous souhaitez
+          extensions: mbstring, pdo, pdo_mysql, curl, xml, bcmath
+          coverage: none
 
-    # Préparer un environnement de production avec Node.js et les fichiers construits
-    - name: Prepare production files
-      run: |
-        mkdir deployment
-        cp -r wiki-back deployment/wiki-back
-        echo "${{ vars.NODE_VERSION }}" > deployment/node_version.txt
-        tar -czf deployment.tar.gz deployment/
+      - name: Install Composer dependencies
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          php composer.phar install --no-dev --optimize-autoloader
 
-    # Configurer SSH pour se connecter au serveur
-    - name: Setup SSH
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      run: |
-        mkdir -p ~/.ssh
-        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H access-5016847966.webspace-host.com >> ~/.ssh/known_hosts
+      # Étape 3: Configurer les variables d'environnement
+      - name: Set environment variables
+        run: echo "APP_ENV=prod" >> .env
 
-    # Transférer les fichiers archivés sur le serveur
-    - name: Transfer build to server
-      run: |
-        scp deployment.tar.gz a1543162@access-5016847966.webspace-host.com:~/wikidefi/
-
-    # Déployer et démarrer le serveur
-    - name: Deploy and start server
-      run: |
-        ssh -tt a1543162@access-5016847966.webspace-host.com << 'EOF'
-        set -e
-
-        # Aller dans le dossier de déploiement
-        cd ~/wikidefi
-
-        # Extraire les fichiers
-        tar -xzf deployment.tar.gz
-        rm deployment.tar.gz
-
-        # Démarrer le serveur en arrière-plan
-        cd deployment/wiki-back
-        nohup node server.js > output.log 2>&1 &
-        echo "Server started successfully."
-        EOF
+      # Étape 4: Déployer l'application sur le serveur via SSH
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/my-symfony-app
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            php bin/console doctrine:migrations:migrate --no-interaction
+            php bin/console cache:clear --env=prod
+            php bin/console assets:install --env=prod
+            sudo systemctl restart nginx  # Si vous utilisez Nginx
