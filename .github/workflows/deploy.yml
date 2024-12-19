@@ -44,6 +44,7 @@ jobs:
 
             echo "Pulling latest changes..."
             git config --global pull.rebase false
+            git stash
             git pull origin main
 
             echo "Installing dependencies..."
