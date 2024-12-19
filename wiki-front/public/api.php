@@ -2,12 +2,16 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+if (!isset($_SESSION['twitch_user']) && !in_array($path[0], ['auth'])) {
+    redirectToTwitchAuth();
+}
 header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(str_replace('api.php', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
 
 // Routeur basique
 if ($path[0] === 'session') {
+    requireAuth();
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'create') {
         createSession();
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'join') {
@@ -23,6 +27,7 @@ if ($path[0] === 'session') {
     }
 
 } elseif ($path[0] === 'game') {
+    requireAuth();
     if ($requestMethod === 'POST' && $path[1] === 'move') {
         makeMove($path[1]);
     } elseif ($requestMethod === 'GET') {
@@ -31,6 +36,7 @@ if ($path[0] === 'session') {
         respondWithError("Route non trouvée.");
     }
 } elseif ($path[0] === 'scoreboard') {
+    requireAuth();
     if ($requestMethod === 'GET') {
         getScoreboard($path[1] ?? null);
     } else {
@@ -296,5 +302,11 @@ function checkAuthStatus() {
             'authenticated' => true,
             'user' => $_SESSION['twitch_user']
         ]);
+    }
+}
+
+function requireAuth() {
+    if (!isset($_SESSION['twitch_user'])) {
+        redirectToTwitchAuth();
     }
 }
