@@ -42,7 +42,7 @@ jobs:
           script: |
             if [ ! -d "~/wikidefi/wiki-api" ]; then
               echo "Cloning the repository for the first time..."
-              git clone https://github.com/your-repo.git ~/wikidefi/wiki-api
+              git clone https://github.com/lucasPicault/wikidefi.git ~/wikidefi/wiki-api
             fi
 
             cd ~/wikidefi/wiki-api
