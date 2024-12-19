@@ -1,6 +1,7 @@
 (async function checkAuthStatus() {
     const response = await fetch('https://wikidefi.fr/api/index.php/auth/status');
     const data = await response.json();
+    console.log(data);
 
     if (!data.authenticated) {
         console.log('Redirection vers Twitch pour authentification.');
