@@ -1,10 +1,26 @@
 <?php
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// Gérer les en-têtes CORS
+header("Access-Control-Allow-Origin: *"); // Modifiez '*' par votre domaine, ex. 'https://wikidefi.fr' pour plus de sécurité
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+    header("Access-Control-Allow-Credentials: true");
+    
+    // Répondre directement aux requêtes OPTIONS (prévols)
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(200);
+        exit;
+    }
+    
+
 if (!isset($_SESSION['twitch_user']) && !in_array($path[0], ['auth'])) {
     redirectToTwitchAuth();
 }
+
 header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(str_replace('api.php', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
@@ -243,7 +259,7 @@ function redirectToTwitchAuth() {
 function handleTwitchCallback() {
     $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
     $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
-    $redirectUri = 'https://wikidefi.fr';
+    $redirectUri = 'https://wikidefi.fr/api.php/auth/callback';
 
     $code = $_GET['code'] ?? null;
     if (!$code) {
