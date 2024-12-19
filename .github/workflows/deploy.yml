@@ -56,7 +56,7 @@ jobs:
             /usr/bin/php8.3-cli bin/console doctrine:migrations:migrate --no-interaction
 
             echo "Fixing permissions..."
-            chmod -R 775 var/cache var/log
+            chmod -Rf 777 ~/wikidefi/
 
       # Étape 5: Résumé des actions effectuées
       - name: Log Deployment Result
