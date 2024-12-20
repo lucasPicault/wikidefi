@@ -255,7 +255,7 @@ function redirectToTwitchAuth() {
 
 function handleTwitchCallback() {
     if (isset($_GET['code'])) {
-        console.log("CODE TROUVE");
+       print "CODE TROUVE";
         // $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
         // $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
         // $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback';
