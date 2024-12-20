@@ -302,6 +302,9 @@ function handleTwitchCallback() {
                 $_SESSION['access_token'] = $accessToken;
 
                 // Redirection vers la page principale
+                if (headers_sent()) {
+                    die("Les en-têtes ont déjà été envoyés.");
+                }
                 header("Location: https://wikidefi.fr");
                 exit;
             } else {
