@@ -23,3 +23,28 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Le bouton avec l'ID 'login-btn' n'a pas été trouvé.");
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Appel API pour récupérer les données utilisateur
+    fetch('https://api.wikidefi.fr/auth/info', {
+        method: 'GET',
+        credentials: 'include', // Inclut les cookies pour accéder à la session PHP
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.authenticated) {
+                console.log('Données utilisateur récupérées :', data.user);
+
+                // Stocker les données utilisateur dans le local storage
+                localStorage.setItem('twitch_user', JSON.stringify(data.user));
+
+                alert('Bienvenue, ' + data.user.display_name + ' !');
+            } else {
+                console.error('Utilisateur non authentifié');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération des données utilisateur :', error);
+        });
+});
+

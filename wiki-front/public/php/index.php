@@ -59,8 +59,8 @@ elseif ($path[0] === 'auth') {
         redirectToTwitchAuth(); // Lance uniquement la redirection
     } elseif ($requestMethod === 'GET' && $path[1] === 'callback') {
         handleTwitchCallback(); // Gère le retour Twitch
-    } elseif ($requestMethod === 'GET' && $path[1] === 'status') {
-        checkAuthStatus(); // Vérifie si l'utilisateur est connecté
+    } elseif ($requestMethod === 'GET' && $path[1] === 'info') {
+        checkAuthInfos(); // Vérifie si l'utilisateur est connecté
     } else {
         respondWithError("Route non trouvée.");
     }
@@ -350,22 +350,16 @@ function getUserData($accessToken) {
 }
 
 
-function checkAuthStatus() {
-    header("Content-Type: application/json");
-    header("Access-Control-Allow-Origin: https://api.wikidefi.fr"); // Utilisez l'origine correcte
-    header("Access-Control-Allow-Credentials: true");
-
-    session_start(); // Assurez-vous que la session est démarrée
-
-    if (!isset($_SESSION['twitch_user'])) {
+function checkAuthInfos() {
+    session_start();
+    if (isset($_SESSION['twitch_user'])) {
+        echo json_encode([
+            'authenticated' => true,
+            'user' => $_SESSION['twitch_user']
+        ]);
+    } else {
         echo json_encode(['authenticated' => false]);
-        exit;
     }
-
-    echo json_encode([
-        'authenticated' => true,
-        'user' => $_SESSION['twitch_user']
-    ]);
     exit;
 }
 
