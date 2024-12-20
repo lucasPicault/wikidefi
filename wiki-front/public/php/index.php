@@ -14,20 +14,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
-    
 
-if (!isset($_SESSION['twitch_user']) && !in_array($path[0], ['auth'])) {
-    redirectToTwitchAuth();
-}
 
 header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-$path = explode('/', trim(str_replace('api.php', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
+$path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
 
 // Routeur basique
-console.log($path);
-console.log($path[0]);
-console.log($path[1]);
+error_log(print_r($path, true)); // Pour afficher le tableau complet dans les logs
+if (isset($path[0])) {
+    error_log("Première partie du chemin : " . $path[0]);
+}
+if (isset($path[1])) {
+    error_log("Deuxième partie du chemin : " . $path[1]);
+}
 if ($path[0] === 'session') {
     requireAuth();
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'create') {
