@@ -251,20 +251,67 @@ function redirectToTwitchAuth() {
 }
 
 function handleTwitchCallback() {
-    if (isset($_GET['error'])) {
-        // Si Twitch retourne une erreur
-        error_log("Erreur Twitch : " . $_GET['error']);
-        echo "Erreur Twitch : " . htmlspecialchars($_GET['error']);
-        exit;
-    }
-
     if (isset($_GET['code'])) {
-        error_log("Code reçu : " . $_GET['code']);
-        // Le reste de votre logique ici pour échanger le code contre un token
+        $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
+        $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
+        $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback';
+        $code = $_GET['code'];
+
+        $url = 'https://id.twitch.tv/oauth2/token';
+        $data = [
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'code' => $code,
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $redirectUri,
+        ];
+
+        $options = [
+            CURLOPT_URL => $url,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($data),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+        ];
+
+        $ch = curl_init();
+        curl_setopt_array($ch, $options);
+        $response = curl_exec($ch);
+        $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpStatus === 200) {
+            $tokenData = json_decode($response, true);
+            $accessToken = $tokenData['access_token'];
+
+            // Récupération des informations utilisateur
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'https://api.twitch.tv/helix/users');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $accessToken,
+                'Client-Id: ' . $clientId,
+            ]);
+
+            $userResponse = curl_exec($ch);
+            curl_close($ch);
+
+            $userData = json_decode($userResponse, true);
+
+            if (isset($userData['data'][0])) {
+                session_start();
+                $_SESSION['twitch_user'] = $userData['data'][0];
+                $_SESSION['access_token'] = $accessToken;
+
+                // Redirigez vers la page d'accueil ou une autre page
+                header("Location: /");
+                exit;
+            }
+        }
+
+        echo 'Erreur lors de la connexion à Twitch.';
     } else {
-        error_log("Aucun code reçu dans le callback.");
-        echo "Aucun code reçu.";
-        exit;
+        echo 'Erreur : Aucun code reçu.';
     }
 }
 
