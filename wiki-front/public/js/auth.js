@@ -12,9 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Stocker les données utilisateur dans le local storage
                 localStorage.setItem('twitch_user', JSON.stringify(data.user));
-
-                // Afficher un message de bienvenue
-                alert('Bienvenue, ' + data.user.display_name + ' !');
             } else {
                 // L'utilisateur n'est pas authentifié, redirection automatique vers Twitch
                 console.log('Utilisateur non authentifié, redirection vers Twitch.');

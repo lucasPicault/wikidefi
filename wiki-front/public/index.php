@@ -26,10 +26,6 @@ header("Access-Control-Allow-Credentials: true");
             <button id="viewer-btn" role="button">Je suis Viewer</button>
         </div>
     </div>
-    <div class="container">
-        <h1>Connexion avec Twitch</h1>
-        <button id="login-btn">Se connecter avec Twitch</button>
-    </div>
     <script>
         // Gestion des redirections en utilisant la base URL définie
         document.getElementById('streamer-btn').addEventListener('click', () => {
