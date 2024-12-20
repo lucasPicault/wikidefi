@@ -101,22 +101,25 @@ function respondWithSuccess($data, $code = 200) {
 
 function createSession() {
     $input = json_decode(file_get_contents('php://input'), true);
+
     if (empty($input['start']) || empty($input['end'])) {
-        respondWithError("Les pages de départ et d'arrivée sont requises.");
+        respondWithError("Les pages de départ et de fin sont obligatoires.");
     }
 
-    $sessionCode = strtoupper(bin2hex(random_bytes(3))); // Exemple de code aléatoire
+    $sessionCode = strtoupper(bin2hex(random_bytes(3)));
+
+    // Sauvegarder la session dans $_SESSION
     $_SESSION['sessions'][$sessionCode] = [
         'start' => $input['start'],
         'end' => $input['end'],
         'isLaunched' => false,
-        'players' => []
+        'players' => [],
     ];
 
     respondWithSuccess([
         'sessionCode' => $sessionCode,
         'start' => $input['start'],
-        'end' => $input['end']
+        'end' => $input['end'],
     ]);
 }
 
