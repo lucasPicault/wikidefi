@@ -246,91 +246,24 @@ function deleteSession($sessionCode) {
 
 
 function redirectToTwitchAuth() {
-    session_start(); // Démarrez la session
-
-    // Si l'utilisateur est déjà authentifié, ne pas rediriger
-    if (isset($_SESSION['twitch_user'])) {
-        header("Location: /dashboard.php"); // Redirigez vers une page appropriée
-        exit;
-    }
-
-    $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-    $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback'; // Assurez-vous que cela correspond à la configuration Twitch
-    $scopes = 'user:read:email';
-
-    // Construire l'URL d'autorisation Twitch
-    $url = "https://id.twitch.tv/oauth2/authorize?client_id=$clientId&redirect_uri=" . urlencode($redirectUri) . "&response_type=code&scope=" . urlencode($scopes);
-
-    header("Location: $url");
+    error_log("redirectToTwitchAuth");
     exit;
 }
 
 function handleTwitchCallback() {
+    if (isset($_GET['error'])) {
+        // Si Twitch retourne une erreur
+        error_log("Erreur Twitch : " . $_GET['error']);
+        echo "Erreur Twitch : " . htmlspecialchars($_GET['error']);
+        exit;
+    }
+
     if (isset($_GET['code'])) {
-        $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-        $clientSecret = 'VOTRE_CLIENT_SECRET';
-        $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback';
-        $code = $_GET['code'];
-
-        $url = 'https://id.twitch.tv/oauth2/token';
-        $data = [
-            'client_id' => $clientId,
-            'client_secret' => $clientSecret,
-            'code' => $code,
-            'grant_type' => 'authorization_code',
-            'redirect_uri' => $redirectUri,
-        ];
-
-        $options = [
-            CURLOPT_URL => $url,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => http_build_query($data),
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
-        ];
-
-        $ch = curl_init();
-        curl_setopt_array($ch, $options);
-        $response = curl_exec($ch);
-        $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpStatus === 200) {
-            $tokenData = json_decode($response, true);
-            $accessToken = $tokenData['access_token'];
-
-            // Récupération des informations utilisateur
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'https://api.twitch.tv/helix/users');
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
-                'Client-Id: ' . $clientId,
-            ]);
-
-            $userResponse = curl_exec($ch);
-            curl_close($ch);
-
-            $userData = json_decode($userResponse, true);
-
-            if (isset($userData['data'][0])) {
-                session_start();
-                $_SESSION['twitch_user'] = $userData['data'][0]; // Stocker les infos utilisateur
-                $_SESSION['access_token'] = $accessToken; // Stocker le token
-
-                // Redirigez vers une page d'accueil connectée
-                header("Location: /dashboard.php");
-                exit;
-            } else {
-                echo "Impossible de récupérer les informations utilisateur.";
-                exit;
-            }
-        } else {
-            echo "Erreur lors de la récupération du token d'accès.";
-            exit;
-        }
+        error_log("Code reçu : " . $_GET['code']);
+        // Le reste de votre logique ici pour échanger le code contre un token
     } else {
-        echo "Erreur : Aucun code reçu.";
+        error_log("Aucun code reçu dans le callback.");
+        echo "Aucun code reçu.";
         exit;
     }
 }
