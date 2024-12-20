@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-          const resp = await fetch('/bot.php/configure', {
+          const resp = await fetch('https://api.wikidefi.fr/bot/configure', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ botToken }),
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('test-bot-config').addEventListener('click', async () => {
       try {
-          const resp = await fetch('/bot.php/test', { method: 'POST' });
+          const resp = await fetch('https://api.wikidefi.fr/bot/test', { method: 'POST' });
 
           if (resp.ok) {
               document.getElementById('bot-config-status').innerText = "Message de test envoyé avec succès.";
@@ -154,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 });
+
+
 
 // Suggestions pour les champs de texte
 const startInput = document.getElementById("start-page");
