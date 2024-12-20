@@ -2,52 +2,48 @@ let sessionCode = null;
 
 // Création de la session
 document.getElementById('create-session').addEventListener('click', async () => {
-  const startInput = document.getElementById('start-page').value.trim();
-  const endInput = document.getElementById('end-page').value.trim();
+  const startPage = document.getElementById('start-page').value.trim();
+  const endPage = document.getElementById('end-page').value.trim();
 
-  if (!startInput || !endInput) {
-    alert("Veuillez entrer les pages de départ et d'arrivée.");
+  if (!startPage || !endPage) {
+    alert("Veuillez remplir les champs de départ et de fin.");
     return;
   }
 
-  // Validation des pages
-  const startValidation = await validateWikipediaPage(startInput);
-  const endValidation = await validateWikipediaPage(endInput);
+  // Validation des pages via l'API Wikipedia
+  const startValidation = await validateWikipediaPage(startPage);
+  const endValidation = await validateWikipediaPage(endPage);
 
   if (!startValidation.valid || !endValidation.valid) {
-    alert("Une ou plusieurs des pages saisies n'existent pas sur Wikipedia. Veuillez vérifier vos entrées.");
+    alert("Les pages saisies ne sont pas valides sur Wikipedia.");
     return;
   }
 
-  // Récupération des titres normalisés et des URLs
-  const normalizedStart = startValidation.normalizedTitle;
-  const normalizedEnd = endValidation.normalizedTitle;
-
   try {
-    const resp = await fetch('https://api.wikidefi.fr/session/createe', { // Correction ici
+    const response = await fetch('https://api.wikidefi.fr/session/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start: normalizedStart, end: normalizedEnd })
+      body: JSON.stringify({
+        start: startValidation.normalizedTitle,
+        end: endValidation.normalizedTitle,
+      }),
     });
 
-    if (resp.ok) {
-      const data = await resp.json();
+    if (response.ok) {
+      const data = await response.json();
       sessionCode = data.sessionCode;
 
-      // Mise à jour de l'interface avec les informations de session
       document.getElementById('session-info').innerHTML = `
-        <strong>Session créée</strong>: ${data.sessionCode}<br>
-        <strong>Page de départ</strong>: <a href="${startValidation.pageUrl}" target="_blank">${normalizedStart}</a><br>
-        <strong>Page d'arrivée</strong>: <a href="${endValidation.pageUrl}" target="_blank">${normalizedEnd}</a>
+        <p><strong>Session créée :</strong> ${sessionCode}</p>
+        <p><strong>Départ :</strong> ${startValidation.normalizedTitle}</p>
+        <p><strong>Fin :</strong> ${endValidation.normalizedTitle}</p>
       `;
-      toggleSessionCreation(false); // Désactiver la création et afficher les options de gestion
     } else {
-      const error = await resp.json();
+      const error = await response.json();
       alert("Erreur : " + error.error);
     }
   } catch (error) {
-    console.error("Erreur lors de la requête fetch :", error);
-    alert("Une erreur est survenue. Consultez la console pour plus de détails.");
+    console.error("Erreur lors de la création de session :", error);
   }
 });
 
@@ -194,17 +190,16 @@ async function validateWikipediaPage(page) {
     const pageId = Object.keys(pages)[0];
 
     if (pageId === "-1") {
-      return { valid: false, normalizedTitle: null, pageUrl: null };
+      return { valid: false };
     }
 
-    const pageInfo = pages[pageId];
-    const normalizedTitle = pageInfo.title;
-    const pageUrl = `https://fr.wikipedia.org/wiki/${encodeURIComponent(normalizedTitle.replace(/ /g, '_'))}`;
-
-    return { valid: true, normalizedTitle, pageUrl };
+    return {
+      valid: true,
+      normalizedTitle: pages[pageId].title,
+    };
   } catch (error) {
-    console.error("Erreur lors de la validation de la page Wikipedia :", error);
-    return { valid: false, normalizedTitle: null, pageUrl: null };
+    console.error("Erreur lors de la validation de la page :", error);
+    return { valid: false };
   }
 }
 
