@@ -3,8 +3,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-
-
 header("Access-Control-Allow-Origin: https://wikidefi.fr"); // Origine spécifique
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
@@ -15,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
-
 
 header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
@@ -397,58 +394,40 @@ function configureBot() {
     $botToken = $input['botToken'] ?? '';
 
     if (empty($botToken)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Le token du bot est requis.']);
-        return;
+        respondWithError('Le token du bot est requis.');
     }
 
-    // Récupérer le nom d'utilisateur du bot via l'API Twitch
     $botUsername = getTwitchUsername($botToken);
 
     if (!$botUsername) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Impossible de récupérer le nom d\'utilisateur associé au token.']);
-        return;
+        respondWithError('Impossible de récupérer le nom d\'utilisateur associé au token.');
     }
 
-    // Sauvegarde des données dans un fichier
     file_put_contents('bot_config.json', json_encode([
         'username' => $botUsername,
         'token' => $botToken
     ]));
 
-    echo json_encode(['message' => 'Configuration enregistrée avec succès.', 'username' => $botUsername]);
+    respondWithSuccess(['message' => 'Configuration enregistrée avec succès.', 'username' => $botUsername]);
 }
 
 function testBot() {
-    // Récupération de la configuration
     $config = json_decode(file_get_contents('bot_config.json'), true);
 
     if (!$config || empty($config['token'])) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Token introuvable ou invalide.']);
-        return;
+        respondWithError('Token introuvable ou invalide.');
     }
 
-    // Récupérer le nom d'utilisateur associé au token
-    $botUsername = getTwitchUsername($config['token']);
-    if (!$botUsername) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Impossible de récupérer le nom du bot.']);
-        return;
-    }
-
-    $channel = '#' . $botUsername; // Utilise le nom de l'utilisateur comme nom de chaîne
+    $botUsername = $config['username'];
+    $channel = '#' . $botUsername;
     $message = 'Ceci est un message de test du bot !';
 
-    // Envoi du message via IRC
     $result = sendMessageToTwitch($botUsername, $config['token'], $channel, $message);
 
     if ($result) {
-        echo json_encode(['message' => 'Message envoyé avec succès.']);
+        respondWithSuccess(['message' => 'Message envoyé avec succès.']);
     } else {
-        http_response_code(500);
-        echo json_encode(['error' => 'Échec de l\'envoi du message.']);
+        respondWithError('Échec de l\'envoi du message.', 500);
     }
 }
 
@@ -460,15 +439,12 @@ function sendMessageToTwitch($username, $token, $channel, $message) {
         return false;
     }
 
-    // Connexion au serveur Twitch IRC
     fwrite($socket, "PASS oauth:$token\r\n");
     fwrite($socket, "NICK $username\r\n");
     fwrite($socket, "JOIN $channel\r\n");
 
-    // Envoi du message
     fwrite($socket, "PRIVMSG $channel :$message\r\n");
 
-    // Attendre une réponse ou fermer
     sleep(1);
     fclose($socket);
 
@@ -480,7 +456,7 @@ function getTwitchUsername($token) {
 
     $headers = [
         'Authorization: Bearer ' . $token,
-        'Client-Id: 8x8rp1xpim5kjpywfjvrsrizsxizxi'
+        'Client-Id: 8x8rp1xpim5kjpywfjvrsrizsxizxi' // Remplacez par votre propre Client ID Twitch
     ];
 
     $ch = curl_init();
