@@ -10,9 +10,11 @@ $requestUri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 switch ($requestUri) {
     case '':
         require 'index.php'; // Page d'accueil
+        exit;
         break;
     case 'streamer':
         require 'streamer.php'; // Page Streamer
+        exit;
         break;
     case 'viewer':
         require 'viewer.php'; // Page Viewer
