@@ -20,7 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
-
+//--------------------------
+//-------SESSION------------
+//--------------------------
 if ($path[0] === 'session') {
     requireAuth();
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'create') {
@@ -36,7 +38,9 @@ if ($path[0] === 'session') {
     } else {
         respondWithError("Route non trouvée.");
     }
-
+//--------------------------
+//------------JEU-----------
+//--------------------------
 } elseif ($path[0] === 'game') {
     requireAuth();
     if ($requestMethod === 'POST' && $path[1] === 'move') {
@@ -46,6 +50,9 @@ if ($path[0] === 'session') {
     } else {
         respondWithError("Route non trouvée.");
     }
+//--------------------------
+//------scoreboard----------
+//--------------------------
 } elseif ($path[0] === 'scoreboard') {
     requireAuth();
     if ($requestMethod === 'GET') {
@@ -54,6 +61,9 @@ if ($path[0] === 'session') {
         respondWithError("Route non trouvée.");
     }
 }
+//--------------------------
+//-------CONNEXION----------
+//--------------------------
 elseif ($path[0] === 'auth') {
     if ($requestMethod === 'GET' && $path[1] === 'login') {
         redirectToTwitchAuth(); // Lance uniquement la redirection
@@ -64,6 +74,9 @@ elseif ($path[0] === 'auth') {
     } else {
         respondWithError("Route non trouvée.");
     }
+//--------------------------
+//---------BOT--------------
+//--------------------------
 } elseif ($path[0] === 'bot') {
     if ($requestMethod === 'POST' && $path[1] === 'configure') {
         configureBot(); 
