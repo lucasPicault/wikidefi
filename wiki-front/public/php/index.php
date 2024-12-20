@@ -25,6 +25,9 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(str_replace('api.php', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
 
 // Routeur basique
+console.log($path);
+console.log($path[0]);
+console.log($path[1]);
 if ($path[0] === 'session') {
     requireAuth();
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'create') {
