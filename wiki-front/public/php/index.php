@@ -64,6 +64,12 @@ elseif ($path[0] === 'auth') {
     } else {
         respondWithError("Route non trouvée.");
     }
+} elseif ($path[0] === 'bot') {
+    if ($requestMethod === 'POST' && $path[1] === 'configure') {
+        configureBot(); 
+    } elseif ($requestMethod === 'POST' && $path[1] === 'test') {
+        testBot(); 
+    }
 } else {
     respondWithError("Route non trouvée.");
 }
@@ -367,4 +373,75 @@ function requireAuth() {
     if (!isset($_SESSION['twitch_user'])) {
         redirectToTwitchAuth();
     }
+}
+
+
+// -----BOT TWITCH------
+
+function configureBot() {
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    $botUsername = $input['botUsername'] ?? '';
+    $botToken = $input['botToken'] ?? '';
+
+    if (empty($botUsername) || empty($botToken)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Bot username et token sont requis.']);
+        return;
+    }
+
+    // Sauvegarde des données dans un fichier
+    file_put_contents('bot_config.json', json_encode([
+        'username' => $botUsername,
+        'token' => $botToken
+    ]));
+
+    echo json_encode(['message' => 'Configuration enregistrée avec succès.']);
+}
+
+function testBot() {
+    // Récupération de la configuration
+    $config = json_decode(file_get_contents('bot_config.json'), true);
+
+    if (!$config || empty($config['username']) || empty($config['token'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Configuration du bot introuvable ou invalide.']);
+        return;
+    }
+
+    $channel = '#nom_du_channel'; // Remplacez par votre nom de chaîne Twitch
+    $message = 'Ceci est un message de test du bot !';
+
+    // Envoi du message via IRC
+    $result = sendMessageToTwitch($config['username'], $config['token'], $channel, $message);
+
+    if ($result) {
+        echo json_encode(['message' => 'Message envoyé avec succès.']);
+    } else {
+        http_response_code(500);
+        echo json_encode(['error' => 'Échec de l\'envoi du message.']);
+    }
+}
+
+function sendMessageToTwitch($username, $token, $channel, $message) {
+    $socket = fsockopen('irc.chat.twitch.tv', 6667, $errno, $errstr, 30);
+
+    if (!$socket) {
+        error_log("Erreur de connexion : $errstr ($errno)");
+        return false;
+    }
+
+    // Connexion au serveur Twitch IRC
+    fwrite($socket, "PASS oauth:$token\r\n");
+    fwrite($socket, "NICK $username\r\n");
+    fwrite($socket, "JOIN $channel\r\n");
+
+    // Envoi du message
+    fwrite($socket, "PRIVMSG $channel :$message\r\n");
+
+    // Attendre une réponse ou fermer
+    sleep(1);
+    fclose($socket);
+
+    return true;
 }

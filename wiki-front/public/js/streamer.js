@@ -111,48 +111,51 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
 
 
 // Configuration et test du bot
-document.getElementById('save-bot-config').addEventListener('click', async () => {
-  const botUsername = document.getElementById('bot-username').value.trim();
-  const botToken = document.getElementById('bot-token').value.trim();
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('save-bot-config').addEventListener('click', async () => {
+      const botUsername = document.getElementById('bot-username').value.trim();
+      const botToken = document.getElementById('bot-token').value.trim();
 
-  if (!botUsername || !botToken) {
-    document.getElementById('bot-config-status').innerText = "Veuillez remplir tous les champs.";
-    return;
-  }
+      if (!botUsername || !botToken) {
+          document.getElementById('bot-config-status').innerText = "Veuillez remplir tous les champs.";
+          return;
+      }
 
-  try {
-    const resp = await fetch('/bot/configure', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ botUsername, botToken }),
-    });
+      try {
+          const resp = await fetch('/bot.php/configure', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ botUsername, botToken }),
+          });
 
-    if (resp.ok) {
-      document.getElementById('bot-config-status').innerText = "Configuration enregistrée avec succès.";
-      document.getElementById('test-bot-config').disabled = false; // Activer le bouton tester
-    } else {
-      const error = await resp.json();
-      document.getElementById('bot-config-status').innerText = "Erreur : " + error.error;
-    }
-  } catch (error) {
-    console.error("Erreur lors de l'enregistrement du bot :", error);
-  }
+          if (resp.ok) {
+              document.getElementById('bot-config-status').innerText = "Configuration enregistrée avec succès.";
+              document.getElementById('test-bot-config').disabled = false;
+          } else {
+              const error = await resp.json();
+              document.getElementById('bot-config-status').innerText = "Erreur : " + error.error;
+          }
+      } catch (error) {
+          console.error("Erreur lors de l'enregistrement du bot :", error);
+      }
+  });
+
+  document.getElementById('test-bot-config').addEventListener('click', async () => {
+      try {
+          const resp = await fetch('/bot.php/test', { method: 'POST' });
+
+          if (resp.ok) {
+              document.getElementById('bot-config-status').innerText = "Le bot a envoyé un message de test avec succès.";
+          } else {
+              const error = await resp.json();
+              document.getElementById('bot-config-status').innerText = "Erreur lors du test : " + error.error;
+          }
+      } catch (error) {
+          console.error("Erreur lors du test du bot :", error);
+      }
+  });
 });
 
-document.getElementById('test-bot-config').addEventListener('click', async () => {
-  try {
-    const resp = await fetch('/bot/test', { method: 'POST' });
-
-    if (resp.ok) {
-      document.getElementById('bot-config-status').innerText = "Le bot a envoyé un message de test avec succès.";
-    } else {
-      const error = await resp.json();
-      document.getElementById('bot-config-status').innerText = "Erreur lors du test : " + error.error;
-    }
-  } catch (error) {
-    console.error("Erreur lors du test du bot :", error);
-  }
-});
 
 // Suggestions pour les champs de texte
 const startInput = document.getElementById("start-page");
