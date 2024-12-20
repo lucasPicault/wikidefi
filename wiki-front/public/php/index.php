@@ -423,7 +423,7 @@ function testBot() {
 
     $botUsername = $config['username'];
     $channel = '#' . $botUsername;
-    $message = 'Ceci est un message de test du bot !';
+    $message = "Le bot WikiDefi viens d'arriver dans votre tchat !";
 
     $result = sendMessageToTwitch($botUsername, $config['token'], $channel, $message);
 
