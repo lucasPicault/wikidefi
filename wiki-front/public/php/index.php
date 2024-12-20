@@ -1,5 +1,4 @@
 <?php
-echo "API";
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -302,8 +301,8 @@ function handleTwitchCallback() {
                 $_SESSION['access_token'] = $accessToken;
 
                 // Redirection vers la page principale
-                if (headers_sent()) {
-                    die("Les en-têtes ont déjà été envoyés.");
+                if (headers_sent($file, $line)) {
+                    die("Les en-têtes ont déjà été envoyés dans $file à la ligne $line.");
                 }
                 header("Location: https://wikidefi.fr");
                 exit;
