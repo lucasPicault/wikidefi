@@ -394,12 +394,20 @@ function requireAuth() {
 function configureBot() {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    $botUsername = $input['botUsername'] ?? '';
     $botToken = $input['botToken'] ?? '';
 
-    if (empty($botUsername) || empty($botToken)) {
+    if (empty($botToken)) {
         http_response_code(400);
-        echo json_encode(['error' => 'Bot username et token sont requis.']);
+        echo json_encode(['error' => 'Le token du bot est requis.']);
+        return;
+    }
+
+    // Récupérer le nom d'utilisateur du bot via l'API Twitch
+    $botUsername = getTwitchUsername($botToken);
+
+    if (!$botUsername) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Impossible de récupérer le nom d\'utilisateur associé au token.']);
         return;
     }
 
@@ -409,7 +417,7 @@ function configureBot() {
         'token' => $botToken
     ]));
 
-    echo json_encode(['message' => 'Configuration enregistrée avec succès.']);
+    echo json_encode(['message' => 'Configuration enregistrée avec succès.', 'username' => $botUsername]);
 }
 
 function testBot() {
