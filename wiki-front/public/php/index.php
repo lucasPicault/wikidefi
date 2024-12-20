@@ -20,14 +20,6 @@ header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
 
-// Routeur basique
-error_log(print_r($path, true)); // Pour afficher le tableau complet dans les logs
-if (isset($path[0])) {
-    error_log("Première partie du chemin : " . $path[0]);
-}
-if (isset($path[1])) {
-    error_log("Deuxième partie du chemin : " . $path[1]);
-}
 if ($path[0] === 'session') {
     requireAuth();
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'create') {
@@ -255,65 +247,65 @@ function redirectToTwitchAuth() {
 
 function handleTwitchCallback() {
     if (isset($_GET['code'])) {
-       print "CODE TROUVE";
-        // $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-        // $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
-        // $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback';
-        // $code = $_GET['code'];
+       print "CODE TROUVE-";
+        $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
+        $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
+        $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback';
+        $code = $_GET['code'];
 
-        // $url = 'https://id.twitch.tv/oauth2/token';
-        // $data = [
-        //     'client_id' => $clientId,
-        //     'client_secret' => $clientSecret,
-        //     'code' => $code,
-        //     'grant_type' => 'authorization_code',
-        //     'redirect_uri' => $redirectUri,
-        // ];
+        $url = 'https://id.twitch.tv/oauth2/token';
+        $data = [
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'code' => $code,
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $redirectUri,
+        ];
 
-        // $options = [
-        //     CURLOPT_URL => $url,
-        //     CURLOPT_POST => true,
-        //     CURLOPT_POSTFIELDS => http_build_query($data),
-        //     CURLOPT_RETURNTRANSFER => true,
-        //     CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
-        // ];
+        $options = [
+            CURLOPT_URL => $url,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($data),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+        ];
 
-        // $ch = curl_init();
-        // curl_setopt_array($ch, $options);
-        // $response = curl_exec($ch);
-        // $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        // curl_close($ch);
+        $ch = curl_init();
+        curl_setopt_array($ch, $options);
+        $response = curl_exec($ch);
+        $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-        // if ($httpStatus === 200) {
-        //     $tokenData = json_decode($response, true);
-        //     $accessToken = $tokenData['access_token'];
+        if ($httpStatus === 200) {
+            $tokenData = json_decode($response, true);
+            $accessToken = $tokenData['access_token'];
 
-        //     // Récupération des informations utilisateur
-        //     $ch = curl_init();
-        //     curl_setopt($ch, CURLOPT_URL, 'https://api.twitch.tv/helix/users');
-        //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        //     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        //         'Authorization: Bearer ' . $accessToken,
-        //         'Client-Id: ' . $clientId,
-        //     ]);
+            // Récupération des informations utilisateur
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'https://api.twitch.tv/helix/users');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $accessToken,
+                'Client-Id: ' . $clientId,
+            ]);
 
-        //     $userResponse = curl_exec($ch);
-        //     curl_close($ch);
+            $userResponse = curl_exec($ch);
+            curl_close($ch);
 
-        //     $userData = json_decode($userResponse, true);
+            $userData = json_decode($userResponse, true);
 
-        //     if (isset($userData['data'][0])) {
-        //         session_start();
-        //         $_SESSION['twitch_user'] = $userData['data'][0];
-        //         $_SESSION['access_token'] = $accessToken;
+            if (isset($userData['data'][0])) {
+                session_start();
+                $_SESSION['twitch_user'] = $userData['data'][0];
+                $_SESSION['access_token'] = $accessToken;
 
-        //         // Redirigez vers la page d'accueil ou une autre page
-        //         header("Location: /");
-        //         exit;
-        //     }
-        // }
+                // Redirigez vers la page d'accueil ou une autre page
+                header("Location: https://wikidefi.fr");
+                exit;
+            }
+        }
 
-        // echo 'Erreur lors de la connexion à Twitch.';
+        echo 'Erreur lors de la connexion à Twitch.';
     } else {
         echo 'Erreur : Aucun code reçu.';
     }
