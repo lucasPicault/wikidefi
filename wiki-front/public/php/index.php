@@ -60,11 +60,11 @@ if ($path[0] === 'session') {
 }
 elseif ($path[0] === 'auth') {
     if ($requestMethod === 'GET' && $path[1] === 'login') {
-        redirectToTwitchAuth();
+        redirectToTwitchAuth(); // Lance uniquement la redirection
     } elseif ($requestMethod === 'GET' && $path[1] === 'callback') {
-        handleTwitchCallback();
+        handleTwitchCallback(); // Gère le retour Twitch
     } elseif ($requestMethod === 'GET' && $path[1] === 'status') {
-        checkAuthStatus();
+        checkAuthStatus(); // Vérifie si l'utilisateur est connecté
     } else {
         respondWithError("Route non trouvée.");
     }
@@ -246,16 +246,19 @@ function deleteSession($sessionCode) {
 
 
 function redirectToTwitchAuth() {
-    session_start();
+    session_start(); // Démarrez la session
+
+    // Si l'utilisateur est déjà authentifié, ne pas rediriger
     if (isset($_SESSION['twitch_user'])) {
-        // L'utilisateur est déjà connecté, pas besoin de rediriger
-        return;
+        header("Location: /dashboard.php"); // Redirigez vers une page appropriée
+        exit;
     }
 
     $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-    $redirectUri = 'https://wikidefi.fr/php/index.php';
+    $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback'; // Assurez-vous que cela correspond à la configuration Twitch
     $scopes = 'user:read:email';
 
+    // Construire l'URL d'autorisation Twitch
     $url = "https://id.twitch.tv/oauth2/authorize?client_id=$clientId&redirect_uri=" . urlencode($redirectUri) . "&response_type=code&scope=" . urlencode($scopes);
 
     header("Location: $url");
@@ -265,7 +268,7 @@ function redirectToTwitchAuth() {
 function handleTwitchCallback() {
     if (isset($_GET['code'])) {
         $clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi';
-        $clientSecret = 'idpvurhkqjf1tjdmxprn3ttnyrllew';
+        $clientSecret = 'VOTRE_CLIENT_SECRET';
         $redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback';
         $code = $_GET['code'];
 
@@ -312,18 +315,23 @@ function handleTwitchCallback() {
 
             if (isset($userData['data'][0])) {
                 session_start();
-                $_SESSION['twitch_user'] = $userData['data'][0];
-                $_SESSION['access_token'] = $accessToken;
+                $_SESSION['twitch_user'] = $userData['data'][0]; // Stocker les infos utilisateur
+                $_SESSION['access_token'] = $accessToken; // Stocker le token
 
-                // Redirigez vers la page d'accueil ou une autre page
-                header("Location: /");
+                // Redirigez vers une page d'accueil connectée
+                header("Location: /dashboard.php");
+                exit;
+            } else {
+                echo "Impossible de récupérer les informations utilisateur.";
                 exit;
             }
+        } else {
+            echo "Erreur lors de la récupération du token d'accès.";
+            exit;
         }
-
-        echo 'Erreur lors de la connexion à Twitch.';
     } else {
-        echo 'Erreur : Aucun code reçu.';
+        echo "Erreur : Aucun code reçu.";
+        exit;
     }
 }
 
