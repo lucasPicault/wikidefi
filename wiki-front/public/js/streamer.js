@@ -24,7 +24,7 @@ document.getElementById('create-session').addEventListener('click', async () => 
   const normalizedEnd = endValidation.normalizedTitle;
 
   try {
-    const resp = await fetch('https://api.wikidefi.fr/session/create', { // Correction ici
+    const resp = await fetch('https://api.wikidefi.fr/session/createe', { // Correction ici
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ start: normalizedStart, end: normalizedEnd })
