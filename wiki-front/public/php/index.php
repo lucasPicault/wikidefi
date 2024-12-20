@@ -392,12 +392,15 @@ function configureBot() {
     $input = json_decode(file_get_contents('php://input'), true);
 
     $botToken = $input['botToken'] ?? '';
+    $clientId = $input['clientId'] ?? '';
 
     if (empty($botToken)) {
-        respondWithError('Le token du bot est requis.');
+        respondWithError("L'access token du bot est requis.");
     }
-
-    $botUsername = getTwitchUsername($botToken);
+    if (empty($clientId)) {
+        respondWithError("Le l'id du client est nécésaire.");
+    }
+    $botUsername = getTwitchUsername($botToken, $clientId);
 
     if (!$botUsername) {
         respondWithError('Impossible de récupérer le nom d\'utilisateur associé au token.');
@@ -451,12 +454,12 @@ function sendMessageToTwitch($username, $token, $channel, $message) {
     return true;
 }
 
-function getTwitchUsername($token) {
+function getTwitchUsername($token, $clientid) {
     $url = 'https://api.twitch.tv/helix/users';
 
     $headers = [
         'Authorization: Bearer ' . $token,
-        'Client-Id: 8x8rp1xpim5kjpywfjvrsrizsxizxi' // Remplacez par votre propre Client ID Twitch
+        'Client-Id: '. $clientid, // Remplacez par votre propre Client ID Twitch
     ];
 
     $ch = curl_init();

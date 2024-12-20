@@ -114,17 +114,22 @@ document.getElementById('end-session-btn').addEventListener('click', async () =>
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('save-bot-config').addEventListener('click', async () => {
       const botToken = document.getElementById('bot-token').value.trim();
+      const clientId = document.getElementById('client-id').value.trim();
 
       if (!botToken) {
           document.getElementById('bot-config-status').innerText = "Veuillez entrer un token.";
           return;
+      }
+      if (!clientId) {
+        document.getElementById('bot-config-status').innerText = "Veuillez entrer un client ID.";
+        return;
       }
 
       try {
           const resp = await fetch('https://api.wikidefi.fr/bot/configure', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ botToken }),
+              body: JSON.stringify({ botToken, clientId }),
           });
 
           if (resp.ok) {
