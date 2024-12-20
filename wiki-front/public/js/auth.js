@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const clientId = '8x8rp1xpim5kjpywfjvrsrizsxizxi'; // Remplacez par votre propre Client ID Twitch
             
             // URL de redirection configurée dans Twitch Developer Console
-            const redirectUri = 'https://wikidefi.fr/php/index.php/auth/callback'; // Remplacez par votre URL de redirection
+            const redirectUri = 'https://api.wikidefi.fr/auth/callback'; // Remplacez par votre URL de redirection
             
             // Scopes nécessaires pour l'application (ici, accès à l'email de l'utilisateur)
             const scope = 'user:read:email';
