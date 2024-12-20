@@ -295,7 +295,6 @@ function handleTwitchCallback() {
             $userData = json_decode($userResponse, true);
             
             if (isset($userData['data'][0])) {
-                print_r($userData['data'][0]);
                 session_start();
                 $_SESSION['twitch_user'] = $userData['data'][0];
                 $_SESSION['access_token'] = $accessToken;
