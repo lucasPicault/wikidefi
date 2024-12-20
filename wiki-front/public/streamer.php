@@ -19,7 +19,6 @@
     <h2>Configurer le bot Twitch</h2>
     <a href="https://twitchtokengenerator.com" target="_blank">Obtenir Votre ACCESS TOKEN</a>
     <p>Renseignez les informations du bot Twitch pour interagir avec le chat.</p>
-    <input type="text" id="bot-username" placeholder="" value="Bot" style="display: none;"/>
     <input type="password" id="bot-token" placeholder="Token" />
     <div>
       <button id="save-bot-config" class="save">Enregistrer</button>

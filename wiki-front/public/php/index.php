@@ -416,17 +416,25 @@ function testBot() {
     // Récupération de la configuration
     $config = json_decode(file_get_contents('bot_config.json'), true);
 
-    if (!$config || empty($config['username']) || empty($config['token'])) {
+    if (!$config || empty($config['token'])) {
         http_response_code(400);
-        echo json_encode(['error' => 'Configuration du bot introuvable ou invalide.']);
+        echo json_encode(['error' => 'Token introuvable ou invalide.']);
         return;
     }
 
-    $channel = '#nom_du_channel'; // Remplacez par votre nom de chaîne Twitch
+    // Récupérer le nom d'utilisateur associé au token
+    $botUsername = getTwitchUsername($config['token']);
+    if (!$botUsername) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Impossible de récupérer le nom du bot.']);
+        return;
+    }
+
+    $channel = '#' . $botUsername; // Utilise le nom de l'utilisateur comme nom de chaîne
     $message = 'Ceci est un message de test du bot !';
 
     // Envoi du message via IRC
-    $result = sendMessageToTwitch($config['username'], $config['token'], $channel, $message);
+    $result = sendMessageToTwitch($botUsername, $config['token'], $channel, $message);
 
     if ($result) {
         echo json_encode(['message' => 'Message envoyé avec succès.']);
@@ -457,4 +465,29 @@ function sendMessageToTwitch($username, $token, $channel, $message) {
     fclose($socket);
 
     return true;
+}
+
+function getTwitchUsername($token) {
+    $url = 'https://api.twitch.tv/helix/users';
+
+    $headers = [
+        'Authorization: Bearer ' . $token,
+        'Client-Id: 8x8rp1xpim5kjpywfjvrsrizsxizxi'
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $data = json_decode($response, true);
+
+    if (isset($data['data'][0]['login'])) {
+        return $data['data'][0]['login'];
+    }
+
+    return null;
 }
