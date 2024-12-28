@@ -2,77 +2,52 @@ let sessionCode = null;
 
 // Création de la session
 document.getElementById('create-session').addEventListener('click', async () => {
-  const twitchUser = localStorage.getItem('twitch_user');
-  if (twitchUser) {
-    try {
-      const syncResponse = await fetch('https://api.wikidefi.fr/auth/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ twitch_user: JSON.parse(twitchUser) }),
-      });
-
-      const syncData = await syncResponse.json();
-      console.log("Utilisateur synchronisé :", syncData);
-
-      if (!syncResponse.ok) {
-        alert(`Erreur de synchronisation : ${syncData.error || "Erreur inconnue"}`);
-        return;
-      }
-    } catch (error) {
-      console.error("Erreur lors de la synchronisation :", error);
-      alert("Erreur lors de la synchronisation des données utilisateur.");
-      return;
-    }
-  }
-
-  // Création de la session après synchronisation réussie
+  
   const startPage = document.getElementById('start-page').value.trim();
   const endPage = document.getElementById('end-page').value.trim();
 
   if (!startPage || !endPage) {
-    alert("Veuillez remplir les champs de départ et de fin.");
-    return;
+      alert("Veuillez remplir les champs de départ et de fin.");
+      return;
   }
 
   console.log("Tentative de création de session avec : ", { startPage, endPage });
 
   try {
-    fetch('https://api.wikidefi.fr/session/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-          start: "France",
-          end: "Paris"
-      }),
-      credentials: 'include' // Inclure les cookies dans la requête
-  });
+    const response = await fetch('https://api.wikidefi.fr/session/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            start: startPage,
+            end: endPage
+        }),
+    });
 
-    const responseText = await syncResponse.text();
+    const responseText = await response.text(); // Lit la réponse brute
     console.log("Réponse brute du serveur :", responseText);
 
-    if (!syncResponse.ok) {
-      alert(`Erreur : ${syncResponse.status} - ${syncResponse.statusText}`);
-      return;
+    if (!response.ok) {
+        alert(`Erreur : ${response.status} - ${response.statusText}`);
+        return;
     }
 
     if (responseText) {
-      const data = JSON.parse(responseText);
-      console.log("Données JSON :", data);
+        const data = JSON.parse(responseText); // Parse uniquement si non vide
+        console.log("Données JSON :", data);
 
-      document.getElementById('session-info').innerHTML = `
-        <p>Session créée avec succès :</p>
-        <p><strong>Code :</strong> ${data.sessionCode}</p>
-        <p><strong>Départ :</strong> ${data.start}</p>
-        <p><strong>Fin :</strong> ${data.end}</p>
-      `;
+        document.getElementById('session-info').innerHTML = `
+            <p>Session créée avec succès :</p>
+            <p><strong>Code :</strong> ${data.sessionCode}</p>
+            <p><strong>Départ :</strong> ${data.start}</p>
+            <p><strong>Fin :</strong> ${data.end}</p>
+        `;
     } else {
-      console.error("La réponse est vide.");
-      alert("Erreur : Réponse vide du serveur.");
+        console.error("La réponse est vide.");
+        alert("Erreur : Réponse vide du serveur.");
     }
-  } catch (error) {
+} catch (error) {
     console.error("Erreur lors de la création de session :", error);
-    alert("Une erreur est survenue lors de la création de la session.");
-  }
+}
 });
 
 // Lancer la partie

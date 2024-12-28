@@ -21,7 +21,7 @@ $path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/')
 //-------SESSION------------
 //--------------------------
 if ($path[0] === 'session') {
-    requireAuth();
+    // requireAuth();
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'create') {
         createSession();
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'join') {
