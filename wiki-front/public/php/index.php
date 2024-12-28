@@ -100,42 +100,15 @@ function respondWithSuccess($data, $code = 200) {
 
 
 function createSession() {
-    $input = json_decode(file_get_contents('php://input'), true);
-
-    // Log pour vérifier les données reçues
-    error_log("Données reçues : " . print_r($input, true));
-
-    if (empty($input['start']) || empty($input['end'])) {
-        respondWithError("Les pages de départ et d'arrivée sont obligatoires.");
-    }
-
-    $sessionCode = strtoupper(bin2hex(random_bytes(3)));
-
-    // Enregistrer dans la session
-    $_SESSION['sessions'][$sessionCode] = [
-        'start' => $input['start'],
-        'end' => $input['end'],
-        'isLaunched' => false,
-        'players' => [],
-    ];
-
-    // Log pour vérifier la session créée
-    error_log("Session créée : " . json_encode($_SESSION['sessions'][$sessionCode]));
-
-    // Envoyer une réponse JSON
-    respondWithSuccessJSON([
-        'sessionCode' => $sessionCode,
-        'start' => $input['start'],
-        'end' => $input['end'],
-    ]);
-}
-
-function respondWithSuccessJSON($data, $code = 200) {
-    http_response_code($code);
     header('Content-Type: application/json');
-    echo json_encode($data); // Envoie les données JSON
+    echo json_encode([
+        'sessionCode' => 'TEST123',
+        'start' => 'France',
+        'end' => 'Paris',
+    ]);
     exit;
 }
+
 
 
 function joinSession() {
