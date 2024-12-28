@@ -10,18 +10,18 @@ document.getElementById('create-session').addEventListener('click', async () => 
       return;
   }
 
+  console.log("Tentative de création de session avec : ", { startPage, endPage });
+
   try {
       const response = await fetch('https://api.wikidefi.fr/session/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-              start: startPage,
-              end: endPage
-          }),
+          body: JSON.stringify({ start: startPage, end: endPage }),
       });
 
       if (response.ok) {
           const data = await response.json();
+          console.log("Réponse de l'API :", data);
           document.getElementById('session-info').innerHTML = `
               <p>Session créée avec succès :</p>
               <p><strong>Code :</strong> ${data.sessionCode}</p>
@@ -30,10 +30,12 @@ document.getElementById('create-session').addEventListener('click', async () => 
           `;
       } else {
           const error = await response.json();
+          console.error("Erreur renvoyée par le serveur :", error);
           alert("Erreur : " + error.error);
       }
   } catch (error) {
       console.error("Erreur lors de la création de session :", error);
+      alert("Une erreur est survenue. Consultez la console pour plus de détails.");
   }
 });
 
