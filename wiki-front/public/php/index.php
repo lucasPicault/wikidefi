@@ -21,7 +21,7 @@ $path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/')
 //-------SESSION------------
 //--------------------------
 if ($path[0] === 'session') {
-    // requireAuth();
+    requireAuth();
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'create') {
         createSession();
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && $path[1] === 'join') {
@@ -61,6 +61,13 @@ if ($path[0] === 'session') {
 //--------------------------
 //-------CONNEXION----------
 //--------------------------
+elseif ($path[0] === 'auth' && $path[1] === 'sync') {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        syncAuthUser();
+    } else {
+        respondWithError("Méthode non autorisée", 405);
+    }
+}
 elseif ($path[0] === 'auth') {
     if ($requestMethod === 'GET' && $path[1] === 'login') {
         redirectToTwitchAuth(); // Lance uniquement la redirection
@@ -96,7 +103,22 @@ function respondWithSuccess($data, $code = 200) {
     exit;
 }
 
+function syncAuthUser() {
+    $input = json_decode(file_get_contents('php://input'), true);
 
+    if (empty($input['twitch_user'])) {
+        respondWithError("Données utilisateur manquantes.");
+    }
+
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    // Stocke les informations utilisateur dans la session
+    $_SESSION['twitch_user'] = $input['twitch_user'];
+
+    respondWithSuccess(["message" => "Utilisateur synchronisé avec succès."]);
+}
 
 
 function createSession() {
@@ -391,10 +413,17 @@ function checkAuthInfos() {
 }
 
 function requireAuth() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    error_log("Session actuelle : " . print_r($_SESSION, true));
+
     if (!isset($_SESSION['twitch_user'])) {
         redirectToTwitchAuth();
     }
 }
+
 
 
 // -----BOT TWITCH------

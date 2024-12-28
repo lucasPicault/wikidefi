@@ -2,6 +2,22 @@ let sessionCode = null;
 
 // Création de la session
 document.getElementById('create-session').addEventListener('click', async () => {
+  const twitchUser = localStorage.getItem('twitch_user');
+  if (twitchUser) {
+      fetch('https://api.wikidefi.fr/auth/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ twitch_user: JSON.parse(twitchUser) })
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log("Utilisateur synchronisé :", data);
+      })
+      .catch(error => {
+          console.error("Erreur lors de la synchronisation :", error);
+      });
+  }
+  
   const startPage = document.getElementById('start-page').value.trim();
   const endPage = document.getElementById('end-page').value.trim();
 
