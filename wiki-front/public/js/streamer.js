@@ -1,41 +1,53 @@
 let sessionCode = null;
 
 // Création de la session
-try {
-  const response = await fetch('https://api.wikidefi.fr/session/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-          start: startPage,
-          end: endPage
-      }),
-  });
+document.getElementById('create-session').addEventListener('click', async () => {
+  const startPage = document.getElementById('start-page').value.trim();
+  const endPage = document.getElementById('end-page').value.trim();
 
-  const responseText = await response.text(); // Lit la réponse brute
-  console.log("Réponse brute du serveur :", responseText);
-
-  if (!response.ok) {
-      alert(`Erreur : ${response.status} - ${response.statusText}`);
+  if (!startPage || !endPage) {
+      alert("Veuillez remplir les champs de départ et de fin.");
       return;
   }
 
-  if (responseText) {
-      const data = JSON.parse(responseText); // Parse uniquement si non vide
-      console.log("Données JSON :", data);
+  console.log("Tentative de création de session avec : ", { startPage, endPage });
 
-      document.getElementById('session-info').innerHTML = `
-          <p>Session créée avec succès :</p>
-          <p><strong>Code :</strong> ${data.sessionCode}</p>
-          <p><strong>Départ :</strong> ${data.start}</p>
-          <p><strong>Fin :</strong> ${data.end}</p>
-      `;
-  } else {
-      console.error("La réponse est vide.");
-      alert("Erreur : Réponse vide du serveur.");
-  }
+  try {
+    const response = await fetch('https://api.wikidefi.fr/session/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            start: startPage,
+            end: endPage
+        }),
+    });
+
+    const responseText = await response.text(); // Lit la réponse brute
+    console.log("Réponse brute du serveur :", responseText);
+
+    if (!response.ok) {
+        alert(`Erreur : ${response.status} - ${response.statusText}`);
+        return;
+    }
+
+    if (responseText) {
+        const data = JSON.parse(responseText); // Parse uniquement si non vide
+        console.log("Données JSON :", data);
+
+        document.getElementById('session-info').innerHTML = `
+            <p>Session créée avec succès :</p>
+            <p><strong>Code :</strong> ${data.sessionCode}</p>
+            <p><strong>Départ :</strong> ${data.start}</p>
+            <p><strong>Fin :</strong> ${data.end}</p>
+        `;
+    } else {
+        console.error("La réponse est vide.");
+        alert("Erreur : Réponse vide du serveur.");
+    }
 } catch (error) {
-  console.error("Erreur lors de la création de session :", error);
+    console.error("Erreur lors de la création de session :", error);
 }
+});
 
 // Lancer la partie
 document.getElementById('launch-game').addEventListener('click', async () => {
