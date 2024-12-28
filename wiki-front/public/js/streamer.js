@@ -18,7 +18,7 @@ document.getElementById('create-session').addEventListener('click', async () => 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             start: startPage,
-            end: endPage
+            endqsd: endPage
         }),     
       });
 
