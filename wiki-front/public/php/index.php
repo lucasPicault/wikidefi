@@ -114,8 +114,11 @@ function syncAuthUser() {
         session_start();
     }
 
-    // Stocke les informations utilisateur dans la session
+    error_log("Données utilisateur reçues pour la synchronisation : " . print_r($input, true));
+
     $_SESSION['twitch_user'] = $input['twitch_user'];
+
+    error_log("Session après synchronisation : " . print_r($_SESSION, true));
 
     respondWithSuccess(["message" => "Utilisateur synchronisé avec succès."]);
 }
