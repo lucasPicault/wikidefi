@@ -100,15 +100,19 @@ function respondWithSuccess($data, $code = 200) {
 
 
 function createSession() {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'sessionCode' => 'TEST123',
-        'start' => 'France',
-        'end' => 'Paris',
-    ]);
-    exit;
-}
+    error_log("Appel à createSession");
 
+    $input = file_get_contents('php://input'); // Données brutes envoyées
+    error_log("Données brutes reçues : " . $input);
+
+    $parsedInput = json_decode($input, true); // Décoder le JSON
+    if (!$parsedInput) {
+        error_log("Erreur dans le JSON : " . json_last_error_msg());
+        respondWithError("Format JSON invalide.");
+    }
+
+    error_log("Données décodées : " . print_r($parsedInput, true));
+}
 
 
 function joinSession() {
