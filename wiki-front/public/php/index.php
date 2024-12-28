@@ -420,7 +420,8 @@ function requireAuth() {
     error_log("Session actuelle : " . print_r($_SESSION, true));
 
     if (!isset($_SESSION['twitch_user'])) {
-        redirectToTwitchAuth();
+        error_log("Utilisateur non authentifié. Redirection vers Twitch Auth.");
+        respondWithError("Non authentifié.", 401);
     }
 }
 
