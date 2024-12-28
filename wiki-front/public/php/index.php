@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-header("Access-Control-Allow-Origin: https://api.wikidefi.fr");
+header("Access-Control-Allow-Origin: https://wikidefi.fr");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Access-Control-Allow-Credentials: true");
@@ -100,12 +100,36 @@ function respondWithSuccess($data, $code = 200) {
 
 
 function createSession() {
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if (empty($input['start']) || empty($input['end'])) {
+        respondWithError("Les pages de départ et d'arrivée sont obligatoires.");
+    }
+
+    // Génère un code de session unique
+    $sessionCode = strtoupper(bin2hex(random_bytes(3)));
+
+    // Enregistre la session dans une variable de session PHP
+    $_SESSION['sessions'][$sessionCode] = [
+        'start' => $input['start'],
+        'end' => $input['end'],
+        'isLaunched' => false,
+        'players' => [],
+    ];
+
+    // Débogage : Log ou echo la réponse pour vérifier
+    error_log("Session créée avec succès : " . json_encode([
+        'sessionCode' => $sessionCode,
+        'start' => $input['start'],
+        'end' => $input['end'],
+    ]));
+
     respondWithSuccess([
-        'message' => 'Réponse statique OK',
-        'status' => 200
+        'sessionCode' => $sessionCode,
+        'start' => $input['start'],
+        'end' => $input['end'],
     ]);
 }
-
 
 
 function joinSession() {
