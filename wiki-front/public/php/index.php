@@ -3,7 +3,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
 //--------------------------
