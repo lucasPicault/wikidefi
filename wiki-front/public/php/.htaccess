@@ -1,5 +1,3 @@
-RewriteRule ^session/create$ /session/create [L,QSA]
-
 DirectoryIndex index.php
 
 
