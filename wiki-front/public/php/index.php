@@ -100,34 +100,20 @@ function respondWithSuccess($data, $code = 200) {
 
 
 function createSession() {
-    try {
-        // Décoder les données d'entrée
-        $input = json_decode(file_get_contents('php://input'), true);
-        if (empty($input['start']) || empty($input['end'])) {
-            respondWithError("Les pages de départ et d'arrivée sont obligatoires.");
-        }
+    error_log("Appel à createSession");
+    $input = file_get_contents('php://input'); // Données brutes reçues
+    error_log("Données brutes reçues : " . $input);
 
-        // Créer la session
-        $sessionCode = strtoupper(bin2hex(random_bytes(3)));
-        $_SESSION['sessions'][$sessionCode] = [
-            'start' => $input['start'],
-            'end' => $input['end'],
-            'isLaunched' => false,
-            'players' => [],
-        ];
-
-        // Envoyer la réponse JSON
-        respondWithSuccess([
-            'sessionCode' => $sessionCode,
-            'start' => $input['start'],
-            'end' => $input['end'],
-        ]);
-    } catch (Exception $e) {
-        error_log("Erreur dans createSession : " . $e->getMessage());
-        respondWithError("Une erreur est survenue.");
+    $parsedInput = json_decode($input, true);
+    if (!$parsedInput) {
+        error_log("Erreur JSON : " . json_last_error_msg());
+        respondWithError("Format JSON invalide.");
     }
-}
 
+    error_log("Données décodées : " . print_r($parsedInput, true));
+
+    // Suite de la logique...
+}
 
 function joinSession() {
     $input = json_decode(file_get_contents('php://input'), true);
