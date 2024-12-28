@@ -3,6 +3,18 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+header("Access-Control-Allow-Origin: https://wikidefi.fr");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Credentials: true");
+
+// Réponse aux requêtes OPTIONS (pré-vol)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+header("Content-Type: application/json");
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
 //--------------------------
@@ -88,20 +100,13 @@ function respondWithSuccess($data, $code = 200) {
 
 
 function createSession() {
-    error_log("Appel à createSession");
-    $input = file_get_contents('php://input'); // Données brutes reçues
-    error_log("Données brutes reçues : " . $input);
+    $input = json_decode(file_get_contents('php://input'), true);
 
-    $parsedInput = json_decode($input, true);
-    if (!$parsedInput) {
-        error_log("Erreur JSON : " . json_last_error_msg());
-        respondWithError("Format JSON invalide.");
-    }
-
-    error_log("Données décodées : " . print_r($parsedInput, true));
-
-    // Suite de la logique...
+    header('Content-Type: application/json');
+    echo json_encode("coucou"); // Envoie les données JSON
 }
+
+
 
 function joinSession() {
     $input = json_decode(file_get_contents('php://input'), true);
