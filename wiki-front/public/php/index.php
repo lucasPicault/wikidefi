@@ -109,7 +109,7 @@ function createSession() {
     // Génère un code de session unique
     $sessionCode = strtoupper(bin2hex(random_bytes(3)));
 
-    // Enregistre la session dans une variable de session PHP
+    // Enregistre la session
     $_SESSION['sessions'][$sessionCode] = [
         'start' => $input['start'],
         'end' => $input['end'],
@@ -117,18 +117,19 @@ function createSession() {
         'players' => [],
     ];
 
-    // Débogage : Log ou echo la réponse pour vérifier
-    error_log("Session créée avec succès : " . json_encode([
-        'sessionCode' => $sessionCode,
-        'start' => $input['start'],
-        'end' => $input['end'],
-    ]));
-
-    respondWithSuccess([
+    // Réponse JSON
+    respondWithSuccessJSON([
         'sessionCode' => $sessionCode,
         'start' => $input['start'],
         'end' => $input['end'],
     ]);
+}
+
+function respondWithSuccessJSON($data, $code = 200) {
+    http_response_code($code);
+    header('Content-Type: application/json');
+    echo json_encode($data); // Envoie les données JSON
+    exit;
 }
 
 

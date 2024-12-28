@@ -1,46 +1,41 @@
 let sessionCode = null;
 
 // Création de la session
-document.getElementById('create-session').addEventListener('click', async () => {
-  const startPage = document.getElementById('start-page').value.trim();
-  const endPage = document.getElementById('end-page').value.trim();
+try {
+  const response = await fetch('https://api.wikidefi.fr/session/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+          start: startPage,
+          end: endPage
+      }),
+  });
 
-  if (!startPage || !endPage) {
-      alert("Veuillez remplir les champs de départ et de fin.");
+  const responseText = await response.text(); // Lit la réponse brute
+  console.log("Réponse brute du serveur :", responseText);
+
+  if (!response.ok) {
+      alert(`Erreur : ${response.status} - ${response.statusText}`);
       return;
   }
 
-  console.log("Tentative de création de session avec : ", { startPage, endPage });
+  if (responseText) {
+      const data = JSON.parse(responseText); // Parse uniquement si non vide
+      console.log("Données JSON :", data);
 
-  try {
-      const response = await fetch('https://api.wikidefi.fr/session/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            start: startPage,
-            endqsd: endPage
-        }),     
-      });
-
-      if (response.ok) {
-          const data = await response.json();
-          console.log("Réponse de l'API :", data);
-          document.getElementById('session-info').innerHTML = `
-              <p>Session créée avec succès :</p>
-              <p><strong>Code :</strong> ${data.sessionCode}</p>
-              <p><strong>Départ :</strong> ${data.start}</p>
-              <p><strong>Fin :</strong> ${data.end}</p>
-          `;
-      } else {
-          const error = await response.json();
-          console.error("Erreur renvoyée par le serveur :", error);
-          alert("Erreur : " + error.error);
-      }
-  } catch (error) {
-      console.error("Erreur lors de la création de session :", error);
-      alert("Une erreur est survenue. Consultez la console pour plus de détails.");
+      document.getElementById('session-info').innerHTML = `
+          <p>Session créée avec succès :</p>
+          <p><strong>Code :</strong> ${data.sessionCode}</p>
+          <p><strong>Départ :</strong> ${data.start}</p>
+          <p><strong>Fin :</strong> ${data.end}</p>
+      `;
+  } else {
+      console.error("La réponse est vide.");
+      alert("Erreur : Réponse vide du serveur.");
   }
-});
+} catch (error) {
+  console.error("Erreur lors de la création de session :", error);
+}
 
 // Lancer la partie
 document.getElementById('launch-game').addEventListener('click', async () => {
