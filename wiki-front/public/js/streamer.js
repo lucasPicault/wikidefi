@@ -16,7 +16,10 @@ document.getElementById('create-session').addEventListener('click', async () => 
       const response = await fetch('https://api.wikidefi.fr/session/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ start: startPage, end: endPage }),
+          body: JSON.stringify({
+            start: startPage,
+            end: endPage
+        }),     
       });
 
       if (response.ok) {

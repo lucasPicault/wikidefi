@@ -117,6 +117,13 @@ function createSession() {
         'players' => [],
     ];
 
+    // Débogage : Log ou echo la réponse pour vérifier
+    error_log("Session créée avec succès : " . json_encode([
+        'sessionCode' => $sessionCode,
+        'start' => $input['start'],
+        'end' => $input['end'],
+    ]));
+
     respondWithSuccess([
         'sessionCode' => $sessionCode,
         'start' => $input['start'],
