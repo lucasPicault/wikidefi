@@ -100,10 +100,10 @@ function respondWithSuccess($data, $code = 200) {
 
 
 function createSession() {
-    $input = json_decode(file_get_contents('php://input'), true);
-
-    header('Content-Type: application/json');
-    echo json_encode("coucou"); // Envoie les données JSON
+    respondWithSuccess([
+        'message' => 'Réponse statique OK',
+        'status' => 200
+    ]);
 }
 
 
