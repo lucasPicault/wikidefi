@@ -28,17 +28,19 @@
     <p id="bot-config-status"></p>
   </div>
 
-  <div id="session-creation" class="green-button">
+<div id="session-creation">
     <label for="start-page">Page de départ</label>
-    <input type="text" id="start-page" placeholder="Page de départ (ex: France)" autocomplete="off" />
+    <input type="text" id="start-page" placeholder="Page de départ (ex : France)" autocomplete="off" />
     <ul id="start-suggestions" class="suggestions"></ul>
-  
+
     <label for="end-page">Page d'arrivée</label>
-    <input type="text" id="end-page" placeholder="Page d'arrivée (ex: Paris)" autocomplete="off" />
+    <input type="text" id="end-page" placeholder="Page d'arrivée (ex : Paris)" autocomplete="off" />
     <ul id="end-suggestions" class="suggestions"></ul>
-  
+
     <button id="create-session">Créer la session</button>
-  </div>
+</div>
+
+<p id="session-info"></p>
 
   <p id="session-info"></p>
   <div id="launch-section" style="display: none;">

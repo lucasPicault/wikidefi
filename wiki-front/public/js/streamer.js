@@ -6,44 +6,34 @@ document.getElementById('create-session').addEventListener('click', async () => 
   const endPage = document.getElementById('end-page').value.trim();
 
   if (!startPage || !endPage) {
-    alert("Veuillez remplir les champs de départ et de fin.");
-    return;
-  }
-
-  // Validation des pages via l'API Wikipedia
-  const startValidation = await validateWikipediaPage(startPage);
-  const endValidation = await validateWikipediaPage(endPage);
-
-  if (!startValidation.valid || !endValidation.valid) {
-    alert("Les pages saisies ne sont pas valides sur Wikipedia.");
-    return;
+      alert("Veuillez remplir les champs de départ et de fin.");
+      return;
   }
 
   try {
-    const response = await fetch('https://api.wikidefi.fr/session/createe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        start: startValidation.normalizedTitle,
-        end: endValidation.normalizedTitle,
-      }),
-    });
+      const response = await fetch('/session/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              start: startPage,
+              end: endPage
+          }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      sessionCode = data.sessionCode;
-
-      document.getElementById('session-info').innerHTML = `
-        <p><strong>Session créée :</strong> ${sessionCode}</p>
-        <p><strong>Départ :</strong> ${startValidation.normalizedTitle}</p>
-        <p><strong>Fin :</strong> ${endValidation.normalizedTitle}</p>
-      `;
-    } else {
-      const error = await response.json();
-      alert("Erreur : " + error.error);
-    }
+      if (response.ok) {
+          const data = await response.json();
+          document.getElementById('session-info').innerHTML = `
+              <p>Session créée avec succès :</p>
+              <p><strong>Code :</strong> ${data.sessionCode}</p>
+              <p><strong>Départ :</strong> ${data.start}</p>
+              <p><strong>Fin :</strong> ${data.end}</p>
+          `;
+      } else {
+          const error = await response.json();
+          alert("Erreur : " + error.error);
+      }
   } catch (error) {
-    console.error("Erreur lors de la création de session :", error);
+      console.error("Erreur lors de la création de session :", error);
   }
 });
 
@@ -206,8 +196,8 @@ async function validateWikipediaPage(page) {
 async function fetchSuggestions(query) {
   const response = await fetch(`https://fr.wikipedia.org/w/api.php?action=opensearch&format=json&search=${encodeURIComponent(query)}&limit=10&namespace=0&origin=*`);
   if (response.ok) {
-    const data = await response.json();
-    return data[1];
+      const data = await response.json();
+      return data[1];
   }
   return [];
 }
@@ -215,13 +205,13 @@ async function fetchSuggestions(query) {
 function createSuggestionList(inputElement, suggestionsElement, suggestions) {
   suggestionsElement.innerHTML = "";
   suggestions.forEach((suggestion) => {
-    const li = document.createElement("li");
-    li.textContent = suggestion;
-    li.addEventListener("click", () => {
-      inputElement.value = suggestion;
-      suggestionsElement.innerHTML = "";
-    });
-    suggestionsElement.appendChild(li);
+      const li = document.createElement("li");
+      li.textContent = suggestion;
+      li.addEventListener("click", () => {
+          inputElement.value = suggestion;
+          suggestionsElement.innerHTML = "";
+      });
+      suggestionsElement.appendChild(li);
   });
 }
 
