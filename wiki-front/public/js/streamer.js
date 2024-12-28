@@ -37,14 +37,15 @@ document.getElementById('create-session').addEventListener('click', async () => 
   console.log("Tentative de création de session avec : ", { startPage, endPage });
 
   try {
-    const response = await fetch('https://api.wikidefi.fr/session/create', {
+    fetch('https://api.wikidefi.fr/session/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        start: startPage,
-        end: endPage,
+          start: "France",
+          end: "Paris"
       }),
-    });
+      credentials: 'include' // Inclure les cookies dans la requête
+  });
 
     const responseText = await response.text();
     console.log("Réponse brute du serveur :", responseText);
