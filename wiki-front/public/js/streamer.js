@@ -47,11 +47,11 @@ document.getElementById('create-session').addEventListener('click', async () => 
       credentials: 'include' // Inclure les cookies dans la requête
   });
 
-    const responseText = await response.text();
+    const responseText = await syncResponse.text();
     console.log("Réponse brute du serveur :", responseText);
 
-    if (!response.ok) {
-      alert(`Erreur : ${response.status} - ${response.statusText}`);
+    if (!syncResponse.ok) {
+      alert(`Erreur : ${syncResponse.status} - ${syncResponse.statusText}`);
       return;
     }
 
