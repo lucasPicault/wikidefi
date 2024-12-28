@@ -102,14 +102,16 @@ function respondWithSuccess($data, $code = 200) {
 function createSession() {
     $input = json_decode(file_get_contents('php://input'), true);
 
+    // Log pour vérifier les données reçues
+    error_log("Données reçues : " . print_r($input, true));
+
     if (empty($input['start']) || empty($input['end'])) {
         respondWithError("Les pages de départ et d'arrivée sont obligatoires.");
     }
 
-    // Génère un code de session unique
     $sessionCode = strtoupper(bin2hex(random_bytes(3)));
 
-    // Enregistre la session
+    // Enregistrer dans la session
     $_SESSION['sessions'][$sessionCode] = [
         'start' => $input['start'],
         'end' => $input['end'],
@@ -117,7 +119,10 @@ function createSession() {
         'players' => [],
     ];
 
-    // Réponse JSON
+    // Log pour vérifier la session créée
+    error_log("Session créée : " . json_encode($_SESSION['sessions'][$sessionCode]));
+
+    // Envoyer une réponse JSON
     respondWithSuccessJSON([
         'sessionCode' => $sessionCode,
         'start' => $input['start'],
